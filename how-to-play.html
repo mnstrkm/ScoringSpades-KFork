@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0f1f1a">
+<title>How to Play Spades — ScoringSpades.com</title>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-0J06PZ892T"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-0J06PZ892T');</script>
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20100%20100'%3E%3Ctext%20y='88'%20font-size='100'%3E%E2%99%A0%3C/text%3E%3C/svg%3E">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  :root {
+    --bg: #0f1f1a;
+    --surface: #1c3329;
+    --surface-2: #244035;
+    --border: #2e4a3e;
+    --text: #f5f0e6;
+    --muted: #8aa599;
+    --team1: #E67E22;
+    --team2: #3498db;
+    --gold: #f1c40f;
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  html, body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", system-ui, sans-serif;
+    font-size: 18px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+  body {
+    padding: calc(var(--safe-top) + 16px) 16px calc(var(--safe-bottom) + 48px);
+    max-width: 640px;
+    margin: 0 auto;
+  }
+  header.top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 28px;
+  }
+  .title { font-size: 26px; font-weight: 700; letter-spacing: -0.02em; }
+  .title .spade { margin-right: 6px; }
+  a { color: var(--gold); }
+  a.back {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 14px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: transparent;
+  }
+  h1 {
+    font-size: 32px;
+    letter-spacing: -0.02em;
+    margin-bottom: 8px;
+  }
+  .lede {
+    color: var(--muted);
+    font-size: 17px;
+    margin-bottom: 28px;
+  }
+  h2 {
+    font-size: 20px;
+    margin-top: 32px;
+    margin-bottom: 10px;
+    color: var(--gold);
+  }
+  p { margin-bottom: 12px; }
+  ul, ol { margin: 10px 0 14px 22px; }
+  li { margin-bottom: 8px; }
+  code, .inline {
+    background: var(--surface-2);
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 15px;
+  }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 18px;
+    margin: 16px 0;
+  }
+  .card h3 {
+    font-size: 16px;
+    color: var(--text);
+    margin-bottom: 8px;
+  }
+  .card .formula {
+    display: block;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 15px;
+    color: var(--gold);
+    margin: 8px 0;
+  }
+  .t1 { color: var(--team1); }
+  .t2 { color: var(--team2); }
+  .footer-nav {
+    margin-top: 40px;
+    display: flex;
+    justify-content: center;
+  }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="title"><span class="spade">♠</span>ScoringSpades.com</div>
+  <a class="back" href="/">← Back</a>
+</header>
+
+<h1>How to Play Spades</h1>
+<p class="lede">The short, practical version — written for people using this app to score their game.</p>
+
+<h2>The basics</h2>
+<ul>
+  <li><strong>4 players, 2 teams of 2.</strong> Partners sit across from each other. <span class="t1">Team 1</span> vs. <span class="t2">Team 2</span> — the colors you see in the app.</li>
+  <li><strong>Standard 52-card deck.</strong> Each player gets 13 cards.</li>
+  <li><strong>Spades are always trump.</strong> A spade beats any card of another suit.</li>
+  <li><strong>Goal:</strong> first team to the target score wins. In this app the target defaults to <code>500</code>, but you can pick 250, 300, or any custom number on the setup screen.</li>
+</ul>
+
+<h2>A round at a glance</h2>
+<ol>
+  <li><strong>Deal.</strong> Deal passes to the left each round.</li>
+  <li><strong>Bid.</strong> Each player says how many tricks they think they'll take. Add the two partners together — that's your <em>team bid</em>, which is what you enter in the app.</li>
+  <li><strong>Play 13 tricks.</strong> Leader plays any non-spade card (spades can't be led until "broken"). Highest card of the led suit wins, unless someone plays a spade — highest spade wins.</li>
+  <li><strong>Count tricks.</strong> Enter each team's trick count in the app. Totals always add to 13.</li>
+  <li><strong>Score.</strong> The app does the math. Repeat until someone hits the target.</li>
+</ol>
+
+<h2>How this app scores</h2>
+
+<div class="card">
+  <h3>You made your bid</h3>
+  <span class="formula">points = bid × 10  +  1 per overtrick (bag)</span>
+  <p>If your team bid 4 and took 5 tricks, you get <code>40 + 1</code> = <code>41</code> points, and you pick up 1 bag.</p>
+</div>
+
+<div class="card">
+  <h3>You missed your bid ("set")</h3>
+  <span class="formula">points = −(bid × 10)</span>
+  <p>Bid 4, take 3, you lose <code>40</code>. You don't get bags when you're set — you just take the hit.</p>
+</div>
+
+<div class="card">
+  <h3>Bags — the overtrick tax</h3>
+  <p>Every extra trick beyond your bid is a <strong>bag</strong>. Bags count <code>+1</code> each, but they build up. The moment your running bag total hits <code>10</code>, the app deducts <code>100</code> points and resets the bag counter.</p>
+  <p>This is why over-bidding a little is safer than under-bidding a lot — sandbagging stings eventually.</p>
+</div>
+
+<div class="card">
+  <h3>Nil</h3>
+  <span class="formula">success = +100  |  failure = −100</span>
+  <p>A player can declare <strong>nil</strong> — a promise to take <em>zero</em> tricks. Tap the nil option on their side of the bid screen. Their partner still bids and plays normally. Nil is scored on top of the team's regular bid result.</p>
+</div>
+
+<div class="card">
+  <h3>Blind nil</h3>
+  <span class="formula">success = +200  |  failure = −200</span>
+  <p>Declare nil <em>before looking at your hand</em>. Double reward, double risk. Mostly used when a team is way behind and needs a swing.</p>
+</div>
+
+<h2>Winning the game</h2>
+<p>First team to reach or exceed the target score wins. If both teams cross the line in the same round, the higher score wins. The app shows the winner on the final screen along with a rematch button.</p>
+
+<h2>A few tips</h2>
+<ul>
+  <li><strong>Count your spades.</strong> Long spade suits win tricks even with low cards, once the short suits are exhausted.</li>
+  <li><strong>Don't bid every face card.</strong> An off-suit Queen that gets trumped is worth zero. Trust the math — only bid what you'll actually take.</li>
+  <li><strong>Track your bags.</strong> The app shows the running bag count. If you're at 8 or 9, bid tighter next round.</li>
+  <li><strong>Talk to your partner — legally.</strong> You're not allowed to signal specific cards, but bidding patterns are communication. A bid of 4 says "I have strength"; a bid of 1 says "carry me."</li>
+</ul>
+
+<div class="footer-nav">
+  <a class="back" href="/">← Back to the scorekeeper</a>
+</div>
+
+</body>
+</html>

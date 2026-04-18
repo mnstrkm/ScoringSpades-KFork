@@ -1,0 +1,1543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0f1f1a">
+<title>ScoringSpades.com</title>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-0J06PZ892T"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-0J06PZ892T');</script>
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20100%20100'%3E%3Ctext%20y='88'%20font-size='100'%3E%E2%99%A0%3C/text%3E%3C/svg%3E">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20100%20100'%3E%3Crect%20width='100'%20height='100'%20fill='%230f1f1a'/%3E%3Ctext%20x='50'%20y='80'%20text-anchor='middle'%20font-size='80'%20fill='white'%3E%E2%99%A0%3C/text%3E%3C/svg%3E">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  :root {
+    --bg: #0f1f1a;
+    --bg-2: #14271f;
+    --surface: #1c3329;
+    --surface-2: #244035;
+    --border: #2e4a3e;
+    --text: #f5f0e6;
+    --muted: #8aa599;
+    --team1: #E67E22;
+    --team1-soft: rgba(230, 126, 34, 0.18);
+    --team2: #3498db;
+    --team2-soft: rgba(52, 152, 219, 0.18);
+    --success: #27ae60;
+    --danger: #e74c3c;
+    --gold: #f1c40f;
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  html, body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", system-ui, sans-serif;
+    font-size: 18px;
+    line-height: 1.4;
+    min-height: 100vh;
+    overscroll-behavior: none;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body {
+    padding: calc(var(--safe-top) + 16px) 16px calc(var(--safe-bottom) + 24px);
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+  .title { font-size: 26px; font-weight: 700; letter-spacing: -0.02em; }
+  .title .spade { color: var(--text); margin-right: 6px; }
+  .title-target { font-size: 13px; color: var(--muted); margin-left: 8px; font-weight: 500; }
+
+  .icon-btn {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    width: 44px; height: 44px;
+    border-radius: 12px;
+    font-size: 18px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .icon-btn:active { background: var(--surface-2); }
+
+  /* ── Setup ─────────────────────────────── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 22px;
+    margin-bottom: 14px;
+  }
+
+  .field { margin-bottom: 18px; }
+  .field:last-child { margin-bottom: 0; }
+  .field-label {
+    font-size: 12px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 8px;
+    font-weight: 700;
+  }
+  .input {
+    width: 100%;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-size: 22px;
+    font-weight: 500;
+    padding: 16px;
+    border-radius: 12px;
+    -webkit-appearance: none;
+    font-family: inherit;
+  }
+  .input:focus { outline: none; border-color: var(--team1); }
+
+  .input-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+  .sub-label {
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 6px;
+    font-weight: 600;
+  }
+
+  .target-chips {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+  }
+  .chip {
+    background: var(--surface-2);
+    border: 2px solid var(--border);
+    color: var(--text);
+    padding: 14px 0;
+    border-radius: 12px;
+    font-size: 17px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .chip.active {
+    border-color: var(--team1);
+    background: var(--team1-soft);
+    color: var(--team1);
+  }
+
+  .toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    cursor: pointer;
+  }
+  .toggle-row span { font-size: 16px; font-weight: 500; }
+  .toggle {
+    width: 48px; height: 28px;
+    background: var(--border);
+    border-radius: 14px;
+    position: relative;
+    transition: background 0.2s;
+  }
+  .toggle::after {
+    content: "";
+    position: absolute;
+    width: 22px; height: 22px;
+    background: white;
+    border-radius: 50%;
+    top: 3px; left: 3px;
+    transition: left 0.2s;
+  }
+  .toggle.on { background: var(--team1); }
+  .toggle.on::after { left: 23px; }
+
+  .btn {
+    display: block;
+    width: 100%;
+    padding: 20px;
+    border: none;
+    border-radius: 14px;
+    font-size: 20px;
+    font-weight: 700;
+    cursor: pointer;
+    color: white;
+    font-family: inherit;
+    margin-top: 12px;
+  }
+  .btn-primary { background: var(--team1); }
+  .btn-primary:active { background: #c96a18; }
+  .btn-secondary {
+    background: var(--surface-2);
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+  .btn-ghost {
+    background: transparent;
+    color: var(--muted);
+    border: 1px solid var(--border);
+    padding: 14px;
+    font-size: 16px;
+  }
+  .btn:active { transform: scale(0.98); }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  /* ── Scoreboard ────────────────────────── */
+  .score-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  .score-card {
+    background: var(--surface);
+    border: 2px solid var(--border);
+    border-radius: 18px;
+    padding: 20px 16px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .score-card.team1 { border-color: var(--team1); }
+  .score-card.team2 { border-color: var(--team2); }
+  .score-card.winner { box-shadow: 0 0 0 2px var(--gold); }
+  .team-name {
+    font-size: 14px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 10px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .score-card.team1 .team-name { color: var(--team1); }
+  .score-card.team2 .team-name { color: var(--team2); }
+  .score-number {
+    font-size: 56px;
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    line-height: 1;
+    margin-bottom: 10px;
+    font-variant-numeric: tabular-nums;
+  }
+  .bags {
+    display: flex;
+    gap: 4px;
+    justify-content: center;
+    margin-top: 8px;
+  }
+  .bag {
+    width: 9px; height: 9px;
+    border-radius: 50%;
+    background: var(--border);
+  }
+  .bag.filled { background: var(--gold); }
+  .bags-label {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .player-names {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 6px;
+  }
+
+  .next-round-btn {
+    background: var(--team1);
+    color: white;
+    border: none;
+    width: 100%;
+    padding: 22px;
+    border-radius: 16px;
+    font-size: 20px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  .next-round-btn:active { background: #c96a18; transform: scale(0.99); }
+
+  /* ── History ───────────────────────────── */
+  .history-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    margin-bottom: 16px;
+  }
+  .history-header {
+    display: grid;
+    grid-template-columns: 50px 1fr 1fr;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 700;
+    background: var(--bg-2);
+  }
+  .history-header > div { text-align: center; }
+  .history-header > div:first-child { text-align: left; }
+  .history-row {
+    display: grid;
+    grid-template-columns: 50px 1fr 1fr;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    align-items: center;
+    font-variant-numeric: tabular-nums;
+  }
+  .history-row:last-child { border-bottom: none; }
+  .h-round {
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 600;
+  }
+  .h-cell {
+    text-align: center;
+  }
+  .h-delta {
+    font-size: 17px;
+    font-weight: 700;
+  }
+  .h-delta.pos { color: var(--success); }
+  .h-delta.neg { color: var(--danger); }
+  .h-meta {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+  .empty-history {
+    padding: 32px 16px;
+    text-align: center;
+    color: var(--muted);
+    font-size: 14px;
+  }
+
+  .footer-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  /* ── Modal ─────────────────────────────── */
+  .modal {
+    position: fixed;
+    inset: 0;
+    background: var(--bg);
+    z-index: 100;
+    overflow-y: auto;
+    padding: calc(var(--safe-top) + 10px) 12px calc(var(--safe-bottom) + 90px);
+  }
+  .modal-inner {
+    max-width: 568px;
+    margin: 0 auto;
+  }
+  .modal-title {
+    font-size: 11px;
+    color: var(--muted);
+    text-align: center;
+    margin-bottom: 2px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-weight: 700;
+  }
+  .modal-headline {
+    font-size: 20px;
+    font-weight: 800;
+    text-align: center;
+    margin-bottom: 12px;
+    letter-spacing: -0.02em;
+  }
+
+  .step-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+    border-left-width: 4px;
+  }
+  .step-card.team1 { border-left-color: var(--team1); }
+  .step-card.team2 { border-left-color: var(--team2); }
+
+  .step-team {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 4px;
+    font-weight: 700;
+  }
+
+  .tricks-team-header {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-template-rows: auto auto;
+    gap: 2px 12px;
+    margin-bottom: 8px;
+  }
+  .tricks-team-name {
+    font-size: 15px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .step-card.team1 .tricks-team-name { color: var(--team1); }
+  .step-card.team2 .tricks-team-name { color: var(--team2); }
+  .tricks-team-bid {
+    grid-row: 1 / span 2;
+    grid-column: 2;
+    align-self: center;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    background: var(--bg-2);
+    padding: 6px 12px;
+    border-radius: 10px;
+  }
+  .tricks-bid-label {
+    font-size: 9px;
+    color: var(--muted);
+    font-weight: 700;
+    letter-spacing: 0.1em;
+  }
+  .tricks-bid-num {
+    font-size: 22px;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+  }
+  .step-card.team1 .tricks-bid-num { color: var(--team1); }
+  .step-card.team2 .tricks-bid-num { color: var(--team2); }
+  .tricks-bid-detail {
+    grid-column: 1;
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .step-card.team1 .step-team { color: var(--team1); }
+  .step-card.team2 .step-team { color: var(--team2); }
+
+  .step-prompt {
+    font-size: 16px;
+    color: var(--muted);
+    margin-bottom: 14px;
+  }
+  .step-prompt strong { color: var(--text); font-weight: 600; }
+
+  .num-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+  }
+  .num-btn {
+    background: var(--surface-2);
+    border: 2px solid var(--border);
+    color: var(--text);
+    min-height: 40px;
+    padding: 6px 0;
+    border-radius: 8px;
+    font-size: 17px;
+    font-weight: 700;
+    cursor: pointer;
+    font-variant-numeric: tabular-nums;
+    font-family: inherit;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .num-btn:active { transform: scale(0.95); }
+  .num-btn.active.t1 { background: var(--team1); border-color: var(--team1); color: white; }
+  .num-btn.active.t2 { background: var(--team2); border-color: var(--team2); color: white; }
+  .num-btn:disabled { opacity: 0.25; cursor: not-allowed; }
+
+  .nil-section { margin-top: 14px; }
+
+  .player-bid {
+    margin-top: 12px;
+    padding-top: 10px;
+    border-top: 1px solid var(--border);
+  }
+  .player-bid:first-of-type {
+    margin-top: 4px;
+    padding-top: 0;
+    border-top: none;
+  }
+  .player-bid-name {
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 6px;
+    color: var(--text);
+  }
+  .nil-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4px;
+    margin-top: 4px;
+  }
+  .nil-big-btn {
+    background: var(--surface-2);
+    border: 2px solid var(--border);
+    color: var(--text);
+    padding: 8px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .nil-big-btn:active { transform: scale(0.95); }
+  .nil-big-btn.active.t1 { background: var(--team1); border-color: var(--team1); color: white; }
+  .nil-big-btn.active.t2 { background: var(--team2); border-color: var(--team2); color: white; }
+
+  .tally-bar {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 10px;
+    align-items: center;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 8px 12px;
+    margin-bottom: 10px;
+  }
+  .tally-team-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    margin-bottom: 1px;
+  }
+  .tally-team-num {
+    font-size: 18px;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+  }
+  .tally-mid {
+    text-align: center;
+    padding: 0 8px;
+  }
+  .tally-total {
+    font-size: 22px;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+  }
+  .tally-remain {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-weight: 700;
+    margin-top: 3px;
+  }
+
+  .nil-players {
+    margin-top: 12px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .nil-player {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px;
+  }
+  .nil-player-name {
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 8px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    text-align: center;
+  }
+  .nil-opts { display: flex; flex-direction: column; gap: 4px; }
+  .nil-opt {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 10px;
+    border-radius: 8px;
+    font-size: 13px;
+    cursor: pointer;
+    font-weight: 600;
+    font-family: inherit;
+  }
+  .nil-opt.active.t1 { background: var(--team1); border-color: var(--team1); color: white; }
+  .nil-opt.active.t2 { background: var(--team2); border-color: var(--team2); color: white; }
+
+  .auto-display {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    background: var(--bg-2);
+    border-radius: 10px;
+    margin-top: 10px;
+    font-size: 14px;
+  }
+  .auto-display strong {
+    font-size: 22px;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .nil-yn {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid var(--border);
+  }
+  .nil-yn-label {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+  .nil-yn-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+  }
+  .nil-yn-btn {
+    background: var(--surface-2);
+    border: 2px solid var(--border);
+    color: var(--text);
+    padding: 12px;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .nil-yn-btn.yes.active {
+    background: var(--success);
+    border-color: var(--success);
+    color: white;
+  }
+  .nil-yn-btn.no.active {
+    background: var(--danger);
+    border-color: var(--danger);
+    color: white;
+  }
+  .nil-yn-btn:active { transform: scale(0.97); }
+
+  .preview-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 14px;
+  }
+  .preview-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .preview-row:last-of-type { border-bottom: none; }
+  .preview-team { font-weight: 600; }
+  .preview-delta {
+    font-size: 22px;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+  }
+  .preview-delta.pos { color: var(--success); }
+  .preview-delta.neg { color: var(--danger); }
+  .preview-detail {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+
+  .modal-actions {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 10px 12px calc(var(--safe-bottom) + 10px);
+    background: linear-gradient(to top, var(--bg) 70%, transparent);
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 8px;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+  .modal-actions .btn { margin-top: 0; padding: 14px; font-size: 17px; }
+
+  /* ── Game over ─────────────────────────── */
+  .gameover-card {
+    text-align: center;
+    padding: 40px 24px;
+    background: var(--surface);
+    border: 2px solid var(--gold);
+    border-radius: 18px;
+    margin-bottom: 16px;
+  }
+  .winner-label {
+    font-size: 13px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 8px;
+    font-weight: 700;
+  }
+  .trophy { font-size: 50px; margin-bottom: 8px; }
+  .winner-name {
+    font-size: 32px;
+    font-weight: 800;
+    margin-bottom: 8px;
+    letter-spacing: -0.02em;
+  }
+  .winner-name.team1 { color: var(--team1); }
+  .winner-name.team2 { color: var(--team2); }
+  .winner-score {
+    font-size: 16px;
+    color: var(--muted);
+  }
+
+  .danger-zone {
+    margin-top: 24px;
+    padding: 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+  }
+  .danger-zone h3 {
+    font-size: 12px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 10px;
+    font-weight: 700;
+  }
+  .btn-danger {
+    background: transparent;
+    color: var(--danger);
+    border: 1px solid var(--danger);
+    padding: 12px;
+    font-size: 14px;
+  }
+
+  /* ── Tip jar ───────────────────────────── */
+  .tip-jar-wrap {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 20px;
+  }
+  .tip-jar-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 14px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: transparent;
+  }
+  .tip-jar-link:hover, .tip-jar-link:active { color: var(--text); }
+
+  .tip-jar-card {
+    margin-top: 20px;
+    padding: 18px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    text-align: center;
+  }
+  .tip-jar-card .tip-jar-msg {
+    color: var(--muted);
+    font-size: 15px;
+    margin-bottom: 12px;
+  }
+  .tip-jar-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 20px;
+    background: #3D95CE;
+    color: white;
+    border-radius: 10px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 16px;
+  }
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+"use strict";
+
+// ═══════════════════════════════════════════════════════════════
+// State
+// ═══════════════════════════════════════════════════════════════
+const STORAGE_KEY = 'spades-state-v1';
+
+function newGameState() {
+  return {
+    phase: 'setup',
+    team1: { score: 0, bags: 0, players: ['', ''] },
+    team2: { score: 0, bags: 0, players: ['', ''] },
+    target: 500,
+    rounds: [],
+  };
+}
+
+function teamLabel(team) {
+  const [a, b] = team.players;
+  if (a && b) return `${a} & ${b}`;
+  return a || b || 'Team';
+}
+
+const LEGACY_DEFAULTS = new Set(['Player 1', 'Player 2', 'Player 3', 'Player 4']);
+
+let state = loadState();
+let modal = null; // { kind: 'bid'|'tricks'|'preview', draft }
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return newGameState();
+    const parsed = JSON.parse(raw);
+    if (!parsed || !parsed.team1) return newGameState();
+    for (const t of [parsed.team1, parsed.team2]) {
+      if (Array.isArray(t.players)) {
+        t.players = t.players.map(p => LEGACY_DEFAULTS.has(p) ? '' : (p || ''));
+      } else {
+        t.players = ['', ''];
+      }
+    }
+    return parsed;
+  } catch { return newGameState(); }
+}
+
+function saveState() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) { console.error(e); }
+}
+
+function resetGame() {
+  state = newGameState();
+  modal = null;
+  saveState();
+  render();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// Scoring
+// ═══════════════════════════════════════════════════════════════
+// teamRound shape: { bid, tricks, nils: [{ playerIdx, type:'nil'|'blind', tricks }] }
+function scoreTeamRound(tr) {
+  let delta = 0, bags = 0;
+
+  for (const n of tr.nils) {
+    const pts = n.type === 'blind' ? 200 : 100;
+    delta += (n.tricks === 0) ? pts : -pts;
+  }
+
+  if (tr.bid === 0) {
+    bags = tr.tricks;
+  } else if (tr.tricks >= tr.bid) {
+    delta += tr.bid * 10;
+    bags = tr.tricks - tr.bid;
+    delta += bags;
+  } else {
+    delta -= tr.bid * 10;
+  }
+
+  return { delta, bags };
+}
+
+function previewRound(round) {
+  const t1 = scoreTeamRound(round.team1);
+  const t2 = scoreTeamRound(round.team2);
+  const t1NewBags = state.team1.bags + t1.bags;
+  const t2NewBags = state.team2.bags + t2.bags;
+  const t1Penalty = Math.floor(t1NewBags / 10) * 100;
+  const t2Penalty = Math.floor(t2NewBags / 10) * 100;
+  return {
+    t1Delta: t1.delta - t1Penalty,
+    t2Delta: t2.delta - t2Penalty,
+    t1Bags: t1.bags,
+    t2Bags: t2.bags,
+    t1Penalty, t2Penalty,
+  };
+}
+
+function commitRound(round) {
+  const p = previewRound(round);
+  state.team1.score += p.t1Delta;
+  state.team2.score += p.t2Delta;
+  state.team1.bags = (state.team1.bags + p.t1Bags) % 10;
+  state.team2.bags = (state.team2.bags + p.t2Bags) % 10;
+
+  round.team1.delta = p.t1Delta;
+  round.team1.bagsAdded = p.t1Bags;
+  round.team1.bagPenalty = p.t1Penalty;
+  round.team2.delta = p.t2Delta;
+  round.team2.bagsAdded = p.t2Bags;
+  round.team2.bagPenalty = p.t2Penalty;
+
+  state.rounds.push(round);
+
+  const t1Win = state.team1.score >= state.target;
+  const t2Win = state.team2.score >= state.target;
+  if ((t1Win || t2Win) && state.team1.score !== state.team2.score) {
+    state.phase = 'gameover';
+  }
+  saveState();
+}
+
+function undoLastRound() {
+  const last = state.rounds.pop();
+  if (!last) return;
+  state.team1.score -= last.team1.delta;
+  state.team2.score -= last.team2.delta;
+  // restore bags: subtract this round's bags, add back any penalty bags
+  state.team1.bags = ((state.team1.bags - last.team1.bagsAdded) + (last.team1.bagPenalty / 100) * 10 + 100) % 10;
+  state.team2.bags = ((state.team2.bags - last.team2.bagsAdded) + (last.team2.bagPenalty / 100) * 10 + 100) % 10;
+  // simpler: recompute bags from scratch
+  recomputeBagsFromHistory();
+  if (state.phase === 'gameover') state.phase = 'playing';
+  saveState();
+}
+
+function recomputeBagsFromHistory() {
+  let t1Bags = 0, t2Bags = 0;
+  for (const r of state.rounds) {
+    t1Bags = (t1Bags + r.team1.bagsAdded) % 10;
+    t2Bags = (t2Bags + r.team2.bagsAdded) % 10;
+  }
+  state.team1.bags = t1Bags;
+  state.team2.bags = t2Bags;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// Render helpers
+// ═══════════════════════════════════════════════════════════════
+const app = document.getElementById('app');
+
+function el(tag, attrs, ...children) {
+  const e = document.createElement(tag);
+  if (attrs) {
+    for (const [k, v] of Object.entries(attrs)) {
+      if (v === false || v == null) continue;
+      if (k === 'class') e.className = v;
+      else if (k === 'html') e.innerHTML = v;
+      else if (k.startsWith('on')) e.addEventListener(k.slice(2).toLowerCase(), v);
+      else if (k === 'value') e.value = v;
+      else if (v === true) e.setAttribute(k, '');
+      else e.setAttribute(k, v);
+    }
+  }
+  for (const c of children.flat()) {
+    if (c == null || c === false) continue;
+    e.appendChild(typeof c === 'string' ? document.createTextNode(c) : c);
+  }
+  return e;
+}
+
+const VENMO_URL = 'https://venmo.com/u/turnepf';
+
+function setupFooter() {
+  return el('div', { class: 'tip-jar-wrap' },
+    el('a', { class: 'tip-jar-link', href: '/how-to-play.html' }, 'How to Play'),
+    el('a', { class: 'tip-jar-link', href: VENMO_URL, target: '_blank', rel: 'noopener' },
+      '🫙 Tip Jar'
+    )
+  );
+}
+
+function tipJarCard() {
+  return el('div', { class: 'tip-jar-card' },
+    el('div', { class: 'tip-jar-msg' }, 'Enjoyed the game? Drop a tip 🫙'),
+    el('a', { class: 'tip-jar-btn', href: VENMO_URL, target: '_blank', rel: 'noopener' },
+      'Venmo @turnepf'
+    )
+  );
+}
+
+function header(rightBtns = []) {
+  return el('div', { class: 'header' },
+    el('div', { class: 'title' },
+      el('span', { class: 'spade' }, '♠'),
+      'ScoringSpades.com',
+      state.phase === 'playing' && el('span', { class: 'title-target' }, `to ${state.target}`)
+    ),
+    el('div', { style: 'display:flex; gap:8px;' }, ...rightBtns)
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════
+// Setup screen
+// ═══════════════════════════════════════════════════════════════
+function renderSetup() {
+  const targets = [250, 300, 500, 'Custom'];
+  const customTarget = ![250, 300, 500].includes(state.target);
+
+  app.replaceChildren(
+    header(),
+    el('div', { class: 'card' },
+      el('div', { class: 'field' },
+        el('div', { class: 'field-label', style: 'color:var(--team1)' }, 'Team 1'),
+        el('div', { class: 'input-row' },
+          playerInput('team1', 0, 'Player 1'),
+          playerInput('team1', 1, 'Partner'),
+        )
+      ),
+      el('div', { class: 'field' },
+        el('div', { class: 'field-label', style: 'color:var(--team2)' }, 'Team 2'),
+        el('div', { class: 'input-row' },
+          playerInput('team2', 0, 'Player 3'),
+          playerInput('team2', 1, 'Partner'),
+        )
+      ),
+      el('div', { class: 'field' },
+        el('div', { class: 'field-label' }, 'Play to'),
+        el('div', { class: 'target-chips' },
+          ...targets.map(t => {
+            const isCustom = t === 'Custom';
+            const active = isCustom ? customTarget : state.target === t;
+            return el('button', {
+              class: 'chip' + (active ? ' active' : ''),
+              onClick: () => {
+                if (isCustom) {
+                  const v = prompt('Target score?', state.target);
+                  const n = parseInt(v, 10);
+                  if (n && n > 0) { state.target = n; saveState(); render(); }
+                } else {
+                  state.target = t; saveState(); render();
+                }
+              }
+            }, isCustom && customTarget ? String(state.target) : String(t));
+          })
+        )
+      ),
+    ),
+    el('button', {
+      class: 'btn btn-primary',
+      onClick: () => {
+        if (!allPlayersNamed()) {
+          alert('Enter all 4 player names first.');
+          return;
+        }
+        state.phase = 'playing'; saveState(); render();
+      }
+    }, 'Start Game'),
+    setupFooter()
+  );
+}
+
+function allPlayersNamed() {
+  return state.team1.players.every(p => p.trim()) &&
+         state.team2.players.every(p => p.trim());
+}
+
+function playerInput(teamKey, idx, label) {
+  return el('div', null,
+    el('div', { class: 'sub-label' }, label),
+    el('input', {
+      class: 'input', type: 'text', value: state[teamKey].players[idx],
+      maxlength: '15', autocapitalize: 'words', autocomplete: 'off',
+      onInput: e => { state[teamKey].players[idx] = e.target.value; saveState(); }
+    })
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════
+// Game / Scoreboard
+// ═══════════════════════════════════════════════════════════════
+function renderGame() {
+  const t1Lead = state.team1.score > state.team2.score;
+  const t2Lead = state.team2.score > state.team1.score;
+
+  app.replaceChildren(
+    header([
+      el('button', { class: 'icon-btn', title: 'Settings',
+        onClick: () => { if (confirm('Return to setup? Current game will be saved.')) { state.phase='setup'; saveState(); render(); } }
+      }, '⚙')
+    ]),
+
+    el('div', { class: 'score-grid' },
+      teamScoreCard('team1', state.team1, t1Lead),
+      teamScoreCard('team2', state.team2, t2Lead),
+    ),
+
+    el('button', {
+      class: 'next-round-btn',
+      onClick: () => openBidModal()
+    }, `Score Round ${state.rounds.length + 1}`),
+
+    historyCard(),
+
+    el('div', { class: 'footer-actions' },
+      el('button', {
+        class: 'btn btn-ghost',
+        disabled: state.rounds.length === 0,
+        onClick: () => { if (confirm('Undo last round?')) { undoLastRound(); render(); } }
+      }, 'Undo last'),
+      el('button', {
+        class: 'btn btn-ghost',
+        onClick: () => { if (confirm('End game? Current scores will stand.')) { state.phase='gameover'; saveState(); render(); } }
+      }, 'End game'),
+    )
+  );
+}
+
+function teamScoreCard(key, team, isLead) {
+  const bagDots = [];
+  for (let i = 0; i < 10; i++) {
+    bagDots.push(el('div', { class: 'bag' + (i < team.bags ? ' filled' : '') }));
+  }
+  return el('div', { class: 'score-card ' + key + (isLead ? ' winner' : '') },
+    el('div', { class: 'team-name' }, teamLabel(team)),
+    el('div', { class: 'score-number' }, String(team.score)),
+    el('div', { class: 'bags' }, ...bagDots),
+    el('div', { class: 'bags-label' }, `${team.bags} bag${team.bags === 1 ? '' : 's'}`)
+  );
+}
+
+function historyCard() {
+  if (state.rounds.length === 0) {
+    return el('div', { class: 'history-card' },
+      el('div', { class: 'empty-history' }, 'No rounds yet. Tap "Score Round 1" to begin.')
+    );
+  }
+  return el('div', { class: 'history-card' },
+    el('div', { class: 'history-header' },
+      el('div', null, 'Round'),
+      el('div', null, teamLabel(state.team1)),
+      el('div', null, teamLabel(state.team2)),
+    ),
+    ...state.rounds.map((r, i) => historyRow(r, i + 1))
+  );
+}
+
+function historyRow(r, n) {
+  return el('div', { class: 'history-row' },
+    el('div', { class: 'h-round' }, String(n)),
+    el('div', { class: 'h-cell' },
+      el('div', { class: 'h-delta ' + (r.team1.delta >= 0 ? 'pos' : 'neg') },
+        (r.team1.delta >= 0 ? '+' : '') + r.team1.delta),
+      el('div', { class: 'h-meta' }, roundMeta(r.team1))
+    ),
+    el('div', { class: 'h-cell' },
+      el('div', { class: 'h-delta ' + (r.team2.delta >= 0 ? 'pos' : 'neg') },
+        (r.team2.delta >= 0 ? '+' : '') + r.team2.delta),
+      el('div', { class: 'h-meta' }, roundMeta(r.team2))
+    ),
+  );
+}
+
+function roundMeta(tr) {
+  const parts = [];
+  parts.push(`bid ${tr.bid}, took ${tr.tricks}`);
+  for (const n of tr.nils) {
+    parts.push(`${n.type === 'blind' ? 'BN' : 'N'}:${n.tricks === 0 ? '✓' : '✗'}`);
+  }
+  return parts.join(' · ');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// Round entry — Bidding step
+// ═══════════════════════════════════════════════════════════════
+function blankDraft() {
+  return {
+    team1: { players: [{ bid: null }, { bid: null }], tricks: null, nilMade: [null, null] },
+    team2: { players: [{ bid: null }, { bid: null }], tricks: null, nilMade: [null, null] },
+  };
+}
+
+// What number is currently shown selected for each team's tricks entry.
+// Team 2 auto-defaults to 13 - team1 when team1 is set and team2 hasn't been picked.
+function effectiveTricks(d) {
+  const t1 = d.team1.tricks;
+  let t2 = d.team2.tricks;
+  if (t2 === null && t1 !== null) t2 = 13 - t1;
+  return { t1, t2 };
+}
+
+function buildTeamRound(dt, tricks) {
+  let bid = 0;
+  const nils = [];
+  dt.players.forEach((p, i) => {
+    if (p.bid === 'nil' || p.bid === 'blind') {
+      const made = dt.nilMade[i] === true;
+      nils.push({ playerIdx: i, type: p.bid, tricks: made ? 0 : 1 });
+    } else if (typeof p.bid === 'number') {
+      bid += p.bid;
+    }
+  });
+  return { bid, tricks, nils };
+}
+
+function openBidModal() {
+  modal = { kind: 'bid', draft: blankDraft() };
+  render();
+}
+
+function renderBidModal() {
+  const d = modal.draft;
+  const ready = isBidReady(d.team1) && isBidReady(d.team2);
+
+  const node = el('div', { class: 'modal' },
+    el('div', { class: 'modal-inner' },
+      el('div', { class: 'modal-title' }, `Round ${state.rounds.length + 1}`),
+      el('div', { class: 'modal-headline' }, 'Bidding'),
+      bidTallyBar(d),
+      teamBidStep('team1', state.team1, d.team1),
+      teamBidStep('team2', state.team2, d.team2),
+    ),
+    el('div', { class: 'modal-actions' },
+      el('button', { class: 'btn btn-secondary',
+        onClick: () => { modal = null; render(); }
+      }, 'Cancel'),
+      el('button', { class: 'btn btn-primary', disabled: !ready,
+        onClick: () => { modal.kind = 'tricks'; render(); }
+      }, 'Next: Tricks')
+    )
+  );
+  app.replaceChildren(node);
+}
+
+function teamBidSummary(dt) {
+  let bid = 0, nilCount = 0;
+  dt.players.forEach(p => {
+    if (p.bid === 'nil' || p.bid === 'blind') nilCount++;
+    else if (typeof p.bid === 'number') bid += p.bid;
+  });
+  return { bid, nilCount };
+}
+
+function bidTallyBar(d) {
+  const t1 = teamBidSummary(d.team1);
+  const t2 = teamBidSummary(d.team2);
+  const total = t1.bid + t2.bid;
+  const remaining = 13 - total;
+  let remainText;
+  if (remaining > 0) remainText = `${remaining} unbid`;
+  else if (remaining < 0) remainText = `${-remaining} over`;
+  else remainText = 'tight (13)';
+  const remainColor = remaining < 0 ? 'var(--danger)' : remaining === 0 ? 'var(--gold)' : 'var(--muted)';
+
+  return el('div', { class: 'tally-bar' },
+    el('div', { class: 'tally-team' },
+      el('div', { class: 'tally-team-label', style: 'color:var(--team1)' }, teamLabel(state.team1)),
+      el('div', { class: 'tally-team-num' }, formatTeamBid(t1))
+    ),
+    el('div', { class: 'tally-mid' },
+      el('div', { class: 'tally-total' }, String(total)),
+      el('div', { class: 'tally-remain', style: `color:${remainColor}` }, remainText)
+    ),
+    el('div', { class: 'tally-team', style: 'text-align:right' },
+      el('div', { class: 'tally-team-label', style: 'color:var(--team2)' }, teamLabel(state.team2)),
+      el('div', { class: 'tally-team-num' }, formatTeamBid(t2))
+    )
+  );
+}
+
+function formatTeamBid(s) {
+  let txt = String(s.bid);
+  if (s.nilCount > 0) txt += ` +${s.nilCount}N`;
+  return txt;
+}
+
+function isBidReady(dt) {
+  return dt.players.every(p => p.bid !== null);
+}
+
+function teamBidStep(key, team, dt) {
+  const teamColor = key === 'team1' ? 't1' : 't2';
+  return el('div', { class: 'step-card ' + key },
+    el('div', { class: 'step-team' }, teamLabel(team)),
+    playerBidBlock(team, dt, 0, teamColor),
+    playerBidBlock(team, dt, 1, teamColor),
+  );
+}
+
+function playerBidBlock(team, dt, playerIdx, teamColor) {
+  const p = dt.players[playerIdx];
+  const setBid = v => { p.bid = v; render(); };
+  return el('div', { class: 'player-bid' },
+    el('div', { class: 'player-bid-name' }, team.players[playerIdx]),
+    el('div', { class: 'num-grid' },
+      ...Array.from({ length: 14 }, (_, i) => el('button', {
+        class: 'num-btn' + (p.bid === i ? ' active ' + teamColor : ''),
+        onClick: () => setBid(i)
+      }, String(i)))
+    ),
+    el('div', { class: 'nil-row' },
+      el('button', {
+        class: 'nil-big-btn' + (p.bid === 'nil' ? ' active ' + teamColor : ''),
+        onClick: () => setBid('nil')
+      }, 'Nil'),
+      el('button', {
+        class: 'nil-big-btn' + (p.bid === 'blind' ? ' active ' + teamColor : ''),
+        onClick: () => setBid('blind')
+      }, 'Blind Nil'),
+    )
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════
+// Round entry — Tricks step
+// ═══════════════════════════════════════════════════════════════
+function renderTricksModal() {
+  const d = modal.draft;
+  const { t1, t2 } = effectiveTricks(d);
+  const t1Nils = nilEntries(d.team1);
+  const t2Nils = nilEntries(d.team2);
+
+  const allNilAnswered =
+    t1Nils.every(n => d.team1.nilMade[n.playerIdx] !== null) &&
+    t2Nils.every(n => d.team2.nilMade[n.playerIdx] !== null);
+  const ready = t1 !== null && t2 !== null && allNilAnswered;
+
+  app.replaceChildren(el('div', { class: 'modal' },
+    el('div', { class: 'modal-inner' },
+      el('div', { class: 'modal-title' }, `Round ${state.rounds.length + 1}`),
+      el('div', { class: 'modal-headline' }, 'Tricks Taken'),
+
+      teamTricksCard('team1', state.team1, d.team1, t1, t1Nils, 't1'),
+      teamTricksCard('team2', state.team2, d.team2, t2, t2Nils, 't2'),
+    ),
+    el('div', { class: 'modal-actions' },
+      el('button', { class: 'btn btn-secondary',
+        onClick: () => { modal.kind = 'bid'; render(); }
+      }, 'Back'),
+      el('button', { class: 'btn btn-primary', disabled: !ready,
+        onClick: () => { modal.kind = 'preview'; render(); }
+      }, 'Preview Score')
+    )
+  ));
+}
+
+function teamTricksCard(key, team, dt, current, nils, colorClass) {
+  return el('div', { class: 'step-card ' + key },
+    teamHeaderWithBid(team, dt),
+    el('div', { class: 'step-prompt' }, 'Tricks won by team'),
+    el('div', { class: 'num-grid' },
+      ...Array.from({ length: 14 }, (_, i) => el('button', {
+        class: 'num-btn' + (current === i ? ' active ' + colorClass : ''),
+        onClick: () => { dt.tricks = i; render(); }
+      }, String(i)))
+    ),
+    ...nils.map(n => el('div', { class: 'nil-yn' },
+      el('div', { class: 'nil-yn-label' },
+        `Did ${team.players[n.playerIdx]} make ${n.type === 'blind' ? 'blind nil' : 'nil'}?`
+      ),
+      el('div', { class: 'nil-yn-row' },
+        el('button', {
+          class: 'nil-yn-btn yes' + (dt.nilMade[n.playerIdx] === true ? ' active' : ''),
+          onClick: () => { dt.nilMade[n.playerIdx] = true; render(); }
+        }, 'Yes ✓'),
+        el('button', {
+          class: 'nil-yn-btn no' + (dt.nilMade[n.playerIdx] === false ? ' active' : ''),
+          onClick: () => { dt.nilMade[n.playerIdx] = false; render(); }
+        }, 'No ✗'),
+      )
+    ))
+  );
+}
+
+function teamHeaderWithBid(team, dt) {
+  const parts = dt.players.map((p, i) => {
+    const name = team.players[i];
+    if (p.bid === 'nil') return `${name}: nil`;
+    if (p.bid === 'blind') return `${name}: blind`;
+    return `${name}: ${p.bid}`;
+  });
+  const summary = teamBidSummary(dt);
+  let total = String(summary.bid);
+  if (summary.nilCount > 0) total += ` +${summary.nilCount}N`;
+  return el('div', { class: 'tricks-team-header' },
+    el('div', { class: 'tricks-team-name' }, teamLabel(team)),
+    el('div', { class: 'tricks-team-bid' },
+      el('span', { class: 'tricks-bid-label' }, 'BID'),
+      el('span', { class: 'tricks-bid-num' }, total)
+    ),
+    el('div', { class: 'tricks-bid-detail' }, parts.join(' · '))
+  );
+}
+
+function nilEntries(dt) {
+  const out = [];
+  dt.players.forEach((p, i) => {
+    if (p.bid === 'nil' || p.bid === 'blind') out.push({ playerIdx: i, type: p.bid });
+  });
+  return out;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// Round entry — Preview step
+// ═══════════════════════════════════════════════════════════════
+function renderPreviewModal() {
+  const d = modal.draft;
+  const { t1, t2 } = effectiveTricks(d);
+  const round = {
+    team1: buildTeamRound(d.team1, t1),
+    team2: buildTeamRound(d.team2, t2),
+  };
+  const p = previewRound(round);
+
+  app.replaceChildren(el('div', { class: 'modal' },
+    el('div', { class: 'modal-inner' },
+      el('div', { class: 'modal-title' }, `Round ${state.rounds.length + 1}`),
+      el('div', { class: 'modal-headline' }, 'Round Score'),
+      el('div', { class: 'preview-card' },
+        previewRow(state.team1, round.team1, p.t1Delta, p.t1Bags, p.t1Penalty, 'team1'),
+        previewRow(state.team2, round.team2, p.t2Delta, p.t2Bags, p.t2Penalty, 'team2'),
+      ),
+      el('div', { class: 'preview-card' },
+        el('div', { class: 'preview-row' },
+          el('div', { class: 'preview-team' }, 'New totals'),
+          el('div', null,
+            el('span', { style: 'color:var(--team1); font-weight:800; font-size:20px;' },
+              String(state.team1.score + p.t1Delta)),
+            el('span', { style: 'color:var(--muted); margin:0 8px;' }, '·'),
+            el('span', { style: 'color:var(--team2); font-weight:800; font-size:20px;' },
+              String(state.team2.score + p.t2Delta)),
+          )
+        )
+      )
+    ),
+    el('div', { class: 'modal-actions' },
+      el('button', { class: 'btn btn-secondary',
+        onClick: () => { modal.kind = 'tricks'; render(); }
+      }, 'Back'),
+      el('button', { class: 'btn btn-primary',
+        onClick: () => {
+          commitRound(round);
+          modal = null;
+          render();
+        }
+      }, 'Confirm')
+    )
+  ));
+}
+
+function previewRow(team, draftTeam, delta, bags, penalty, key) {
+  const detail = [];
+  detail.push(`bid ${draftTeam.bid}, took ${draftTeam.tricks}`);
+  for (const n of draftTeam.nils) {
+    detail.push(`${team.players[n.playerIdx]} ${n.type === 'blind' ? 'blind nil' : 'nil'}: ${n.tricks === 0 ? 'made ✓' : 'failed ✗'}`);
+  }
+  if (bags > 0) detail.push(`+${bags} bag${bags === 1 ? '' : 's'}`);
+  if (penalty > 0) detail.push(`−${penalty} bag penalty`);
+
+  return el('div', { class: 'preview-row' },
+    el('div', null,
+      el('div', { class: 'preview-team', style: `color:var(--${key === 'team1' ? 'team1' : 'team2'})` }, teamLabel(team)),
+      el('div', { class: 'preview-detail' }, detail.join(' · '))
+    ),
+    el('div', { class: 'preview-delta ' + (delta >= 0 ? 'pos' : 'neg') },
+      (delta >= 0 ? '+' : '') + delta)
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════
+// Game over
+// ═══════════════════════════════════════════════════════════════
+function renderGameOver() {
+  const winner = state.team1.score > state.team2.score ? 'team1'
+    : state.team2.score > state.team1.score ? 'team2' : 'tie';
+  const winningTeam = winner === 'team1' ? state.team1 : state.team2;
+
+  app.replaceChildren(
+    header(),
+    el('div', { class: 'gameover-card' },
+      el('div', { class: 'trophy' }, '🏆'),
+      el('div', { class: 'winner-label' }, winner === 'tie' ? 'Tied!' : 'Winner'),
+      el('div', { class: 'winner-name ' + (winner === 'tie' ? '' : winner) },
+        winner === 'tie' ? 'Tie game' : teamLabel(winningTeam)),
+      el('div', { class: 'winner-score' },
+        `${teamLabel(state.team1)} ${state.team1.score} · ${teamLabel(state.team2)} ${state.team2.score}`)
+    ),
+    el('div', { class: 'score-grid' },
+      teamScoreCard('team1', state.team1, winner === 'team1'),
+      teamScoreCard('team2', state.team2, winner === 'team2'),
+    ),
+    historyCard(),
+    el('button', {
+      class: 'btn btn-primary',
+      onClick: () => {
+        const t1Players = state.team1.players, t2Players = state.team2.players;
+        const target = state.target;
+        state = newGameState();
+        state.team1.players = t1Players; state.team2.players = t2Players;
+        state.target = target;
+        state.phase = 'playing';
+        saveState();
+        render();
+      }
+    }, 'Rematch (same teams)'),
+    tipJarCard(),
+    el('div', { class: 'danger-zone' },
+      el('h3', null, 'Or'),
+      el('button', { class: 'btn btn-danger',
+        onClick: () => { if (confirm('Start a brand new game?')) resetGame(); }
+      }, 'New game (reset everything)')
+    )
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════
+// Router
+// ═══════════════════════════════════════════════════════════════
+function render() {
+  // Preserve scroll position across re-renders so taps inside a scrolled modal
+  // don't snap the viewport back to the top.
+  const prevModal = app.querySelector('.modal');
+  const prevScroll = prevModal ? prevModal.scrollTop : window.scrollY;
+  const prevWasModal = !!prevModal;
+
+  if (modal) {
+    if (modal.kind === 'bid') renderBidModal();
+    else if (modal.kind === 'tricks') renderTricksModal();
+    else if (modal.kind === 'preview') renderPreviewModal();
+  } else if (state.phase === 'setup') renderSetup();
+  else if (state.phase === 'playing') renderGame();
+  else if (state.phase === 'gameover') renderGameOver();
+
+  const newModal = app.querySelector('.modal');
+  if (newModal && prevWasModal) newModal.scrollTop = prevScroll;
+  else if (!newModal && !prevWasModal) window.scrollTo(0, prevScroll);
+}
+
+render();
+</script>
+</body>
+</html>
