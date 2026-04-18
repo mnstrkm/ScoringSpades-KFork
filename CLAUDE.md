@@ -4,7 +4,7 @@ A scoring app for the card game Spades. Single-page web app at scoringspades.com
 
 ## Tech
 
-- Single `index.html` file. No build step, no dependencies, no framework.
+- `index.html` (app) + `how-to-play.html` (rules page) + `manifest.json` + `icon.svg`. No build step, no dependencies, no framework.
 - Vanilla JS with a tiny custom `el(tag, attrs, ...children)` render helper (not React).
 - Inline CSS, inline SVG favicon, inline JS — everything ships in one file (~48 KB).
 - State persisted to `localStorage` under key `spades-state-v1`.
