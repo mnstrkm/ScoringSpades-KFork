@@ -807,12 +807,35 @@
 // State
 // ═══════════════════════════════════════════════════════════════
 const STORAGE_KEY = 'spades-state-v1';
+const LAST_PLAYERS_KEY = 'spades-players-v1';
+
+function loadLastPlayers() {
+  try {
+    const raw = localStorage.getItem(LAST_PLAYERS_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed?.team1) || !Array.isArray(parsed?.team2)) return null;
+    return parsed;
+  } catch { return null; }
+}
+
+function saveLastPlayers(s) {
+  const all = [...s.team1.players, ...s.team2.players];
+  if (!all.every(p => p && p.trim())) return;
+  try {
+    localStorage.setItem(LAST_PLAYERS_KEY, JSON.stringify({
+      team1: s.team1.players.slice(),
+      team2: s.team2.players.slice(),
+    }));
+  } catch (e) { console.error(e); }
+}
 
 function newGameState() {
+  const last = loadLastPlayers();
   return {
     phase: 'setup',
-    team1: { score: 0, bags: 0, players: ['', ''] },
-    team2: { score: 0, bags: 0, players: ['', ''] },
+    team1: { score: 0, bags: 0, players: last ? last.team1.slice() : ['', ''] },
+    team2: { score: 0, bags: 0, players: last ? last.team2.slice() : ['', ''] },
     target: 500,
     rounds: [],
   };
@@ -847,7 +870,10 @@ function loadState() {
 }
 
 function saveState() {
-  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) { console.error(e); }
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    saveLastPlayers(state);
+  } catch (e) { console.error(e); }
 }
 
 function resetGame() {
