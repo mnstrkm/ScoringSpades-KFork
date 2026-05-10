@@ -6,6 +6,3 @@
 !.dev.vars.example
 .env*
 !.env.example
-
-# wrangler init --from-dash scaffolding (deploy is ephemeral; do this in /tmp instead)
-/scoringspades/
