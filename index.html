@@ -831,6 +831,11 @@
 const STORAGE_KEY = 'spades-state-v1';
 const LAST_PLAYERS_KEY = 'spades-players-v1';
 
+function track(name, params) {
+  console.log('[track]', name, params || {});
+  if (typeof gtag === 'function') gtag('event', name, params || {});
+}
+
 function loadLastPlayers() {
   try {
     const raw = localStorage.getItem(LAST_PLAYERS_KEY);
@@ -988,10 +993,21 @@ function commitRound(round) {
   state.rounds.push(round);
   nextTip();
 
+  track('round_completed', {
+    round_number: state.rounds.length,
+    target: state.target,
+  });
+
   const t1Win = state.team1.score >= state.target;
   const t2Win = state.team2.score >= state.target;
   if ((t1Win || t2Win) && state.team1.score !== state.team2.score) {
     state.phase = 'gameover';
+    track('game_completed', {
+      rounds_played: state.rounds.length,
+      target: state.target,
+      winning_score: Math.max(state.team1.score, state.team2.score),
+      losing_score: Math.min(state.team1.score, state.team2.score),
+    });
   }
   saveState();
 }
@@ -1031,7 +1047,6 @@ function el(tag, attrs, ...children) {
     for (const [k, v] of Object.entries(attrs)) {
       if (v === false || v == null) continue;
       if (k === 'class') e.className = v;
-      else if (k === 'html') e.innerHTML = v;
       else if (k.startsWith('on')) e.addEventListener(k.slice(2).toLowerCase(), v);
       else if (k === 'value') e.value = v;
       else if (v === true) e.setAttribute(k, '');
@@ -1050,18 +1065,18 @@ const VENMO_URL = 'https://venmo.com/u/turnepf';
 function setupFooter() {
   return el('div', { class: 'tip-jar-wrap' },
     el('a', { class: 'tip-jar-link', href: '/how-to-play.html' }, 'How to Play'),
-    el('a', { class: 'tip-jar-link', href: VENMO_URL, target: '_blank', rel: 'noopener' },
-      '🫙 Tip Jar'
-    )
+    el('a', { class: 'tip-jar-link', href: VENMO_URL, target: '_blank', rel: 'noopener',
+      onClick: () => track('tip_jar_click', { location: 'setup_footer' })
+    }, '🫙 Tip Jar')
   );
 }
 
 function tipJarCard() {
   return el('div', { class: 'tip-jar-card' },
     el('div', { class: 'tip-jar-msg' }, 'Enjoyed the game? Drop a tip 🫙'),
-    el('a', { class: 'tip-jar-btn', href: VENMO_URL, target: '_blank', rel: 'noopener' },
-      'Venmo @turnepf'
-    )
+    el('a', { class: 'tip-jar-btn', href: VENMO_URL, target: '_blank', rel: 'noopener',
+      onClick: () => track('tip_jar_click', { location: 'gameover_card' })
+    }, 'Venmo @turnepf')
   );
 }
 
@@ -1129,7 +1144,9 @@ function renderSetup() {
           alert('Enter all 4 player names first.');
           return;
         }
-        state.phase = 'playing'; saveState(); render();
+        state.phase = 'playing';
+        track('game_started', { target: state.target });
+        saveState(); render();
       }
     }, 'Start Game'),
     setupFooter()
@@ -1580,6 +1597,7 @@ function renderGameOver() {
         state.team1.players = t1Players; state.team2.players = t2Players;
         state.target = target;
         state.phase = 'playing';
+        track('game_started', { target: state.target, rematch: true });
         saveState();
         render();
       }

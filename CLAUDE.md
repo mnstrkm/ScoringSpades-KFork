@@ -18,23 +18,50 @@ A scoring app for the card game Spades. Single-page web app at scoringspades.com
 - **Scoring model** (`scoreTeamRound`): `bid × 10` if they hit, `−bid × 10` if they miss, `+1` per bag. Bag overflow: every 10 bags = `−100` penalty. Nil = ±100, Blind nil = ±200.
 - **Legacy name migration:** old default placeholder names (`Player 1`–`Player 4`) are wiped on load so the user isn't stuck with them.
 
-## Deploy (Cloudflare Pages)
+## Deploy (Cloudflare Worker + Static Assets)
 
-Project name is **`spades`** (not `scoringspades` — the CF project kept its original name). Direct upload, no Git integration yet. Domains: `scoringspades.com`, `www.scoringspades.com`, `spades-7wr.pages.dev`.
+**This is a Worker, not a Pages project** — the original Pages project (`spades` / `spades-7wr.pages.dev`) was migrated. Don't try `wrangler pages deploy`; it will fail with "Project not found."
 
-Deploy from a **clean staging directory** — never from the project root, because `.wrangler/cache/wrangler-account.json` contains an auth token that must not be uploaded.
+- **Worker name:** `scoringspades` (not `spades`)
+- **Account:** `851a39c5483b9aef842112771b5f8542` (patrick@patrickturner.net)
+- **Domains:** `scoringspades.com`, `www.scoringspades.com`, `scoringspades.patrick-851.workers.dev`
+- **Mechanism:** Workers Static Assets (`assets.directory` binding). No custom Worker logic — static files served directly. `_headers` and `_redirects` are supported (Pages-compatible behavior).
+
+### Deploy
+
+`wrangler.jsonc` lives at the repo root (added by Cloudflare's GitHub auto-config bot in PR #1, April 2026), so deploy is one command from the project root:
 
 ```
-rm -rf /tmp/spades-deploy && mkdir /tmp/spades-deploy
-cp index.html /tmp/spades-deploy/
-wrangler pages deploy /tmp/spades-deploy --project-name=spades --commit-message="<msg>"
+cd ~/Documents/Dev/ScoringSpades
+wrangler deploy
+
+# Verify
+curl -sI https://scoringspades.com/ | grep -iE "^(content-security|strict-transport|x-content|referrer-policy|permissions-policy)"
 ```
 
 Auth: already logged in as patrick@patrickturner.net via `wrangler` OAuth. Verify with `wrangler whoami`.
 
+### Heads-up: `assets.directory` is `"."` (whole repo)
+
+The committed `wrangler.jsonc` ships **the entire repo root** as static assets. Anything visible at the repo root is potentially servable at `https://scoringspades.com/<filename>`. Currently:
+
+- `LICENSE`, `README.md`, `CLAUDE.md`, `wrangler.jsonc` would all be servable if Cloudflare didn't filter them. In practice they 404 today — wrangler's asset upload appears to skip dotfiles and certain config files — but **don't rely on this**. If you ever drop a file at the repo root that contains anything sensitive, it could be served.
+- Safer fix when you're next in here: move deployable files into a `public/` subdir and change `assets.directory` to `"./public"`. Or add `assets.exclude` if wrangler supports it (check current docs).
+- Don't put `.env`, secrets, or local-only notes at the repo root.
+
+### Notes & gotchas
+
+- `_headers` is a **config file**, not a static asset. `wrangler deploy` will report it in the file count but it's interpreted by Cloudflare to set response headers, not served at `/_headers` (that path returns 404).
+- The local `.wrangler/cache/wrangler-account.json` only contains the public `account.id` and `account.name` — no token. (The OAuth token lives at `~/.wrangler/config/default.toml`.) The old "deploy from clean staging dir to avoid leaking the wrangler cache" rule was based on a misunderstanding.
+- If `wrangler.jsonc` ever disappears, recover it with: `cd /tmp && wrangler init --from-dash scoringspades --yes` (creates a subdir with the dashboard's current config). **Never run that command inside the `ScoringSpades/` repo dir** — macOS case-insensitivity creates a confusing nested `scoringspades/` directory.
+
+### CSP / security headers
+
+Production headers come from `_headers`. CSP allowlists `googletagmanager.com` + `google-analytics.com` for gtag. If you add any new third-party script (Stripe, Cloudflare Turnstile, Sentry, etc.), update `script-src` and likely `connect-src` in `_headers` or the page will silently break with CSP violations in the browser console.
+
 ## GitHub
 
-Repo: `turnepf/ScoringSpades` on GitHub. `gh` CLI is authenticated as `turnepf`. Push with `git push` — currently no CI/CD hook to Cloudflare Pages, so deploys are still manual via the wrangler command above.
+Repo: `turnepf/ScoringSpades` on GitHub. `gh` CLI is authenticated as `turnepf`. Push with `git push` — no CI/CD hook to Cloudflare yet, so deploys are still manual.
 
 ## Monetization
 
