@@ -7,9 +7,22 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#0f1f1a">
 <link rel="manifest" href="/manifest.json">
-<title>ScoringSpades.com</title>
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-0J06PZ892T"></script>
-<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-0J06PZ892T');</script>
+<title>Scoring Spades</title>
+<script src="config.js"></script>
+<script>
+(function() {
+  var id = (window.SCORING_CONFIG || {}).gaId;
+  if (!id) return;
+  var s = document.createElement('script');
+  s.async = true;
+  s.src = 'https://www.googletagmanager.com/gtag/js?id=' + id;
+  document.head.appendChild(s);
+  window.dataLayer = window.dataLayer || [];
+  window.gtag = function() { dataLayer.push(arguments); };
+  gtag('js', new Date());
+  gtag('config', id);
+})();
+</script>
 <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20100%20100'%3E%3Ctext%20y='88'%20font-size='100'%3E%E2%99%A0%3C/text%3E%3C/svg%3E">
 <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20100%20100'%3E%3Crect%20width='100'%20height='100'%20fill='%230f1f1a'/%3E%3Ctext%20x='50'%20y='80'%20text-anchor='middle'%20font-size='80'%20fill='white'%3E%E2%99%A0%3C/text%3E%3C/svg%3E">
 <style>
@@ -771,14 +784,14 @@
     margin-bottom: 3px;
   }
 
-  .tip-jar-wrap {
+  .footer-links {
     display: flex;
     justify-content: center;
     gap: 10px;
     flex-wrap: wrap;
     margin-top: 20px;
   }
-  .tip-jar-link {
+  .footer-link {
     display: inline-flex;
     align-items: center;
     gap: 6px;
@@ -790,33 +803,7 @@
     border: 1px solid var(--border);
     background: transparent;
   }
-  .tip-jar-link:hover, .tip-jar-link:active { color: var(--text); }
-
-  .tip-jar-card {
-    margin-top: 20px;
-    padding: 18px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    text-align: center;
-  }
-  .tip-jar-card .tip-jar-msg {
-    color: var(--muted);
-    font-size: 15px;
-    margin-bottom: 12px;
-  }
-  .tip-jar-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 12px 20px;
-    background: #3D95CE;
-    color: white;
-    border-radius: 10px;
-    text-decoration: none;
-    font-weight: 600;
-    font-size: 16px;
-  }
+  .footer-link:hover, .footer-link:active { color: var(--text); }
 </style>
 </head>
 <body>
@@ -1060,23 +1047,14 @@ function el(tag, attrs, ...children) {
   return e;
 }
 
-const VENMO_URL = 'https://venmo.com/u/turnepf';
+const GITHUB_URL = 'https://github.com/turnepf/ScoringSpades';
 
 function setupFooter() {
-  return el('div', { class: 'tip-jar-wrap' },
-    el('a', { class: 'tip-jar-link', href: '/how-to-play.html' }, 'How to Play'),
-    el('a', { class: 'tip-jar-link', href: VENMO_URL, target: '_blank', rel: 'noopener',
-      onClick: () => track('tip_jar_click', { location: 'setup_footer' })
-    }, '🫙 Tip Jar')
-  );
-}
-
-function tipJarCard() {
-  return el('div', { class: 'tip-jar-card' },
-    el('div', { class: 'tip-jar-msg' }, 'Enjoyed the game? Drop a tip 🫙'),
-    el('a', { class: 'tip-jar-btn', href: VENMO_URL, target: '_blank', rel: 'noopener',
-      onClick: () => track('tip_jar_click', { location: 'gameover_card' })
-    }, 'Venmo @turnepf')
+  return el('div', { class: 'footer-links' },
+    el('a', { class: 'footer-link', href: '/how-to-play.html' }, 'How to Play'),
+    el('a', { class: 'footer-link', href: GITHUB_URL, target: '_blank', rel: 'noopener',
+      onClick: () => track('github_click', { location: 'setup_footer' })
+    }, 'Launch your own ScoringSpades app')
   );
 }
 
@@ -1084,7 +1062,7 @@ function header(rightBtns = []) {
   return el('div', { class: 'header' },
     el('div', { class: 'title' },
       el('span', { class: 'spade' }, '♠'),
-      'ScoringSpades.com',
+      'Scoring Spades',
       state.phase === 'playing' && el('span', { class: 'title-target' }, `to ${state.target}`)
     ),
     el('div', { style: 'display:flex; gap:8px;' }, ...rightBtns)
@@ -1602,7 +1580,6 @@ function renderGameOver() {
         render();
       }
     }, 'Rematch (same teams)'),
-    tipJarCard(),
     el('div', { class: 'danger-zone' },
       el('h3', null, 'Or'),
       el('button', { class: 'btn btn-danger',

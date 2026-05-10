@@ -18,10 +18,10 @@ A single `index.html` file (~50 KB). No build step, no dependencies, no framewor
 
 ## Run locally
 
-Just open `index.html` in any modern browser. There's no server required for development. If you want a real local URL, the easiest option is:
+Just open `public/index.html` in any modern browser. There's no server required for development. If you want a real local URL, the easiest option is:
 
 ```sh
-npx serve .
+npx serve public
 ```
 
 …which serves the directory at `http://localhost:3000`.
@@ -32,16 +32,20 @@ The MIT license lets you fork and deploy your own copy. Because everything is st
 
 ### 1. Things you'll want to change before deploying
 
-These are hardcoded to me (Patrick) and you should swap them out:
+The app is set up so most fork-time customization happens in one file:
 
-| What | Where | Replace with |
-|---|---|---|
-| Google Analytics ID `G-0J06PZ892T` | `index.html` (2 lines near the top), `how-to-play.html` (same 2 lines) | Your own GA4 measurement ID, or delete the two `<script>` tags entirely to drop GA |
-| Venmo handle `turnepf` / link | `index.html` — search for `VENMO_URL` and `venmo.com/u/turnepf` | Your tip jar of choice, or delete the `tip-jar-*` blocks (about 30 lines total) |
-| Title "ScoringSpades.com" | `index.html` `<title>` and header, `how-to-play.html` `<title>` and header | Your name |
-| App name "ScoringSpades" / "Spades" | `manifest.json` (`name`, `short_name`) | Your name |
+**`public/config.js`** — set your own Google Analytics ID, or leave it as `''` to disable analytics entirely. That's it; no other edits required for a basic fork.
 
-The CSP in `_headers` allowlists Google's tag manager domains for gtag. If you remove GA, you can tighten the CSP by removing `https://www.googletagmanager.com` and `https://www.google-analytics.com` from `script-src` and `connect-src`. If you swap to a different analytics vendor, allowlist their domains instead.
+A few things you *might* want to change but don't need to (all under `public/`):
+
+| What | Where |
+|---|---|
+| Title "Scoring Spades" | `public/index.html` `<title>` + the header literal in the JS (`'Scoring Spades'`); `public/how-to-play.html` `<title>` + header `<div>` |
+| App name "ScoringSpades" / "Spades" (PWA install) | `public/manifest.json` (`name`, `short_name`) |
+| Favicon | `public/icon.svg` and the inline data-URL favicons in both HTML files |
+| GitHub link in the footer ("Launch your own ScoringSpades app") | `public/index.html` — `GITHUB_URL` constant and the link label |
+
+The CSP in `public/_headers` allowlists Google's tag manager domains for gtag. If you set `gaId: ''`, you can tighten the CSP by removing `https://www.googletagmanager.com` and `https://www.google-analytics.com` from `script-src` and `connect-src`. If you swap to a different analytics vendor, allowlist their domains instead.
 
 ### 2. Deploy
 
@@ -58,15 +62,11 @@ wrangler login
 wrangler deploy
 ```
 
-**Anything else:** point the host at the repo root. The 5 files that need to ship are `index.html`, `how-to-play.html`, `manifest.json`, `icon.svg`, and `_headers` (Cloudflare-specific; other hosts have their own equivalent). The `_headers` file is what wires up the CSP and HSTS — without it (or its equivalent on your host), you lose the security-header defenses but the app still works.
+**Anything else:** point the host at the `public/` directory. The files that ship are `index.html`, `how-to-play.html`, `config.js`, `manifest.json`, `icon.svg`, and `_headers` (Cloudflare-specific; other hosts have their own equivalent). The `_headers` file is what wires up the CSP and HSTS — without it (or its equivalent on your host), you lose the security-header defenses but the app still works.
 
 ### 3. Custom domain
 
 Whatever host you pick, point your domain at it per their docs. The app uses only relative URLs internally, so it'll work from any origin without code changes.
-
-## Tip jar
-
-If you enjoy the app, the tip jar on the live site is a Venmo link to [@turnepf](https://venmo.com/u/turnepf). No pressure. (If you fork the app, swap the link to your own as described above.)
 
 ## License
 

@@ -4,12 +4,13 @@ A scoring app for the card game Spades. Single-page web app at scoringspades.com
 
 ## Tech
 
-- `index.html` (app) + `how-to-play.html` (rules page) + `manifest.json` + `icon.svg`. No build step, no dependencies, no framework.
+- `index.html` (app) + `how-to-play.html` (rules page) + `config.js` (fork-time settings) + `manifest.json` + `icon.svg`. No build step, no dependencies, no framework.
 - Vanilla JS with a tiny custom `el(tag, attrs, ...children)` render helper (not React).
-- Inline CSS, inline SVG favicon, inline JS — everything ships in one file (~48 KB).
+- Inline CSS, inline SVG favicon, inline JS — main app ships in one file (~50 KB).
 - State persisted to `localStorage` under key `spades-state-v1`.
 - Mobile-first (iOS PWA meta tags, safe-area insets) — viewport is locked, no user-scalable.
-- Google Analytics: `G-0J06PZ892T` (loaded from gtag).
+- **`config.js`** sets `window.SCORING_CONFIG.gaId` (Google Analytics ID — currently `G-0J06PZ892T`; set to `''` to disable). Both HTML files load this and conditionally inject the gtag script. This is the only fork-time variable; titles and branding are hardcoded as "Scoring Spades".
+- Footer link on the setup screen points to the GitHub repo ("Launch your own ScoringSpades app") — drives forks.
 
 ## App structure (inside `index.html`)
 
@@ -41,13 +42,13 @@ curl -sI https://scoringspades.com/ | grep -iE "^(content-security|strict-transp
 
 Auth: already logged in as patrick@patrickturner.net via `wrangler` OAuth. Verify with `wrangler whoami`.
 
-### Heads-up: `assets.directory` is `"."` (whole repo)
+### Repo layout: deployable files live in `public/`
 
-The committed `wrangler.jsonc` ships **the entire repo root** as static assets. Anything visible at the repo root is potentially servable at `https://scoringspades.com/<filename>`. Currently:
+`wrangler.jsonc` is configured with `assets.directory: "./public"`. **Only files inside `public/` are deployed.** This is structural protection — repo-root files like `LICENSE`, `README.md`, `CLAUDE.md`, `wrangler.jsonc`, `.git/` etc. are never uploaded.
 
-- `LICENSE`, `README.md`, `CLAUDE.md`, `wrangler.jsonc` would all be servable if Cloudflare didn't filter them. In practice they 404 today — wrangler's asset upload appears to skip dotfiles and certain config files — but **don't rely on this**. If you ever drop a file at the repo root that contains anything sensitive, it could be served.
-- Safer fix when you're next in here: move deployable files into a `public/` subdir and change `assets.directory` to `"./public"`. Or add `assets.exclude` if wrangler supports it (check current docs).
-- Don't put `.env`, secrets, or local-only notes at the repo root.
+Why this exists: an earlier deploy used `assets.directory: "."` (the value Cloudflare's auto-config bot wrote in PR #1) and ended up shipping `.git/objects/...`, `.wrangler/cache/...`, and the markdown files as 200-OK assets. Restructured into `public/` to make that impossible.
+
+**The deployable files:** `index.html`, `how-to-play.html`, `config.js`, `manifest.json`, `icon.svg`, `_headers`. If you add a new asset (e.g., a sound effect, an image, a privacy.html), drop it inside `public/` or the deploy won't include it.
 
 ### Notes & gotchas
 
@@ -65,4 +66,4 @@ Repo: `turnepf/ScoringSpades` on GitHub. `gh` CLI is authenticated as `turnepf`.
 
 ## Monetization
 
-Venmo tip jar (`@turnepf`) on setup screen (small pill) and winner screen (card). Links go to `https://venmo.com/u/turnepf`. No fees, no third-party account. Venmo has no web-checkout — link opens app on mobile, shows profile + QR on desktop.
+None. Previously had a Venmo tip jar (`@turnepf`) on setup + winner screens — removed in favor of a "Launch your own ScoringSpades app" link to the GitHub repo on the setup screen. App is no-fee, no-account, MIT-licensed, fork-friendly.
