@@ -22,6 +22,15 @@
   gtag('js', new Date());
   gtag('config', id);
 })();
+(function() {
+  var id = (window.SCORING_CONFIG || {}).adsenseId;
+  if (!id) return;
+  var s = document.createElement('script');
+  s.async = true;
+  s.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=' + id;
+  s.crossOrigin = 'anonymous';
+  document.head.appendChild(s);
+})();
 </script>
 <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20100%20100'%3E%3Ctext%20y='88'%20font-size='100'%3E%E2%99%A0%3C/text%3E%3C/svg%3E">
 <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20100%20100'%3E%3Crect%20width='100'%20height='100'%20fill='%230f1f1a'/%3E%3Ctext%20x='50'%20y='80'%20text-anchor='middle'%20font-size='80'%20fill='white'%3E%E2%99%A0%3C/text%3E%3C/svg%3E">
@@ -1115,8 +1124,8 @@ const GITHUB_URL = 'https://github.com/turnepf/ScoringSpades';
 
 function siteFooter(location) {
   return el('div', { class: 'footer-links' },
-    el('a', { class: 'footer-link', href: '/how-to-play.html' }, 'How to Play'),
-    el('a', { class: 'footer-link', href: '/privacy.html' }, 'Privacy'),
+    el('a', { class: 'footer-link', href: '/how-to-play' }, 'How to Play'),
+    el('a', { class: 'footer-link', href: '/privacy' }, 'Privacy'),
     el('a', { class: 'footer-link', href: GITHUB_URL, target: '_blank', rel: 'noopener',
       onClick: () => track('github_click', { location: location || 'footer' })
     }, 'Launch your own ScoringSpades app')
