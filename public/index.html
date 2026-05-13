@@ -137,6 +137,17 @@
     grid-template-columns: repeat(4, 1fr);
     gap: 8px;
   }
+  .chips-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .field-hint {
+    font-size: 13px;
+    color: var(--muted);
+    margin-top: 8px;
+    line-height: 1.4;
+  }
   .chip {
     background: var(--surface-2);
     border: 2px solid var(--border);
@@ -817,6 +828,16 @@
 // ═══════════════════════════════════════════════════════════════
 const STORAGE_KEY = 'spades-state-v1';
 const LAST_PLAYERS_KEY = 'spades-players-v1';
+const TIPS_PREF_KEY = 'spades-tips-enabled';
+
+let tipsEnabled = (() => {
+  try { return localStorage.getItem(TIPS_PREF_KEY) !== 'off'; }
+  catch { return true; }
+})();
+function setTipsEnabled(v) {
+  tipsEnabled = !!v;
+  try { localStorage.setItem(TIPS_PREF_KEY, tipsEnabled ? 'on' : 'off'); } catch {}
+}
 
 function track(name, params) {
   console.log('[track]', name, params || {});
@@ -863,33 +884,75 @@ function teamLabel(team) {
 
 const LEGACY_DEFAULTS = new Set(['Player 1', 'Player 2', 'Player 3', 'Player 4']);
 
+// Tips. Unconditional tips are always eligible. Conditional tips only fire
+// when their `when(state)` returns true — picked preferentially when any do.
 const SPADES_TIPS = [
-  "Count spades as they're played — knowing who holds the last one often decides the hand.",
-  "Don't break spades early unless you have the Ace or King to back it up.",
-  "A short side suit (void or singleton) turns into trump tricks — bid aggressively when you have one.",
-  "If your partner bids nil, lead your highest side-suit cards so they can safely dump low.",
-  "Cover your partner's nil before chasing your own bid — a failed nil costs 100.",
-  "Overbidding by one beats sandbagging by three: every 10 bags costs you 100 points.",
-  "Save high spades for late in the hand — you can often trump an opponent's winner.",
-  "Count your sure tricks (Aces, protected Kings) before adding bids from short suits.",
-  "Near 9 bags, consider taking a set on purpose to reset the bag count.",
-  "When leading against a nil, play your highest card in the suit — force them to take it.",
-  "A singleton Ace is a one-trick wonder; a doubleton Ace-King is worth two, maybe more.",
-  "If you're set either way, dump your bags on your opponents instead of your partner.",
-  "Bid to your hand, not to 13 — a forced tight bid often ends in a set.",
+  { text: "Count spades as they're played — knowing who holds the last one often decides the hand." },
+  { text: "Don't break spades early unless you have the Ace or King to back it up." },
+  { text: "A short side suit (void or singleton) turns into trump tricks — bid aggressively when you have one." },
+  { text: "Save high spades for late in the hand — you can often trump an opponent's winner." },
+  { text: "Count your sure tricks (Aces, protected Kings) before adding bids from short suits." },
+  { text: "A singleton Ace is a one-trick wonder; a doubleton Ace-King is worth two, maybe more." },
+  { text: "If you're set either way, dump your bags on your opponents instead of your partner." },
+  { text: "When leading against a nil, play your highest card in the suit — force them to take it." },
+  { text: "Near 9 bags — consider taking a set on purpose to reset the bag count.",
+    when: s => s.team1.bags >= 8 || s.team2.bags >= 8 },
+  { text: "Overbidding by one beats sandbagging by three: every 10 bags costs you 100 points.",
+    when: s => lastRoundOverbid(s) },
+  { text: "Bid to your hand, not to 13 — a forced tight bid often ends in a set.",
+    when: s => lastRoundSet(s) },
+  { text: "Way behind? A blind nil is a 200-point swing — risky but real.",
+    when: s => Math.abs(s.team1.score - s.team2.score) >= 100 },
+  { text: "Tight endgame — bags matter less than hitting your bid exactly.",
+    when: s => (s.target - s.team1.score) <= 50 && (s.target - s.team2.score) <= 50 },
+  { text: "Cover your partner's nil before chasing your own bid — a failed nil costs 100.",
+    when: s => lastRoundHadNil(s) },
+  { text: "If your partner bids nil, lead your highest side-suit cards so they can safely dump low.",
+    when: s => lastRoundHadNil(s) },
+  { text: "Almost there — don't get fancy, just hit your bid.",
+    when: s => nearWinLowBags(s) },
 ];
 
-let currentTipIdx = Math.floor(Math.random() * SPADES_TIPS.length);
+function lastRound(s) { return s.rounds[s.rounds.length - 1]; }
+function lastRoundSet(s) {
+  const r = lastRound(s); if (!r) return false;
+  return r.team1.delta < 0 || r.team2.delta < 0;
+}
+function lastRoundOverbid(s) {
+  const r = lastRound(s); if (!r) return false;
+  return (r.team1.delta > 0 && r.team1.bagsAdded >= 2) ||
+         (r.team2.delta > 0 && r.team2.bagsAdded >= 2);
+}
+function lastRoundHadNil(s) {
+  const r = lastRound(s); if (!r) return false;
+  return (r.team1.nils && r.team1.nils.length > 0) ||
+         (r.team2.nils && r.team2.nils.length > 0);
+}
+function nearWinLowBags(s) {
+  return ((s.target - s.team1.score) <= 50 && s.team1.bags <= 3) ||
+         ((s.target - s.team2.score) <= 50 && s.team2.bags <= 3);
+}
 
-function nextTip() {
-  if (SPADES_TIPS.length <= 1) return;
-  let next = currentTipIdx;
-  while (next === currentTipIdx) next = Math.floor(Math.random() * SPADES_TIPS.length);
-  currentTipIdx = next;
+let currentTipIdx = 0;
+
+function pickTip() {
+  if (SPADES_TIPS.length === 0) return;
+  const conditional = [], unconditional = [];
+  for (let i = 0; i < SPADES_TIPS.length; i++) {
+    const t = SPADES_TIPS[i];
+    if (t.when) { if (t.when(state)) conditional.push(i); }
+    else { unconditional.push(i); }
+  }
+  const pool = conditional.length > 0 ? conditional : unconditional;
+  if (pool.length === 0) return;
+  let candidates = pool.filter(i => i !== currentTipIdx);
+  if (candidates.length === 0) candidates = pool;
+  currentTipIdx = candidates[Math.floor(Math.random() * candidates.length)];
 }
 
 let state = loadState();
 let modal = null; // { kind: 'bid'|'tricks'|'preview', draft }
+pickTip();
 
 function loadState() {
   try {
@@ -978,7 +1041,7 @@ function commitRound(round) {
   round.team2.bagPenalty = p.t2Penalty;
 
   state.rounds.push(round);
-  nextTip();
+  pickTip();
 
   track('round_completed', {
     round_number: state.rounds.length,
@@ -1010,6 +1073,7 @@ function undoLastRound() {
   // simpler: recompute bags from scratch
   recomputeBagsFromHistory();
   if (state.phase === 'gameover') state.phase = 'playing';
+  pickTip();
   saveState();
 }
 
@@ -1049,11 +1113,12 @@ function el(tag, attrs, ...children) {
 
 const GITHUB_URL = 'https://github.com/turnepf/ScoringSpades';
 
-function setupFooter() {
+function siteFooter(location) {
   return el('div', { class: 'footer-links' },
     el('a', { class: 'footer-link', href: '/how-to-play.html' }, 'How to Play'),
+    el('a', { class: 'footer-link', href: '/privacy.html' }, 'Privacy'),
     el('a', { class: 'footer-link', href: GITHUB_URL, target: '_blank', rel: 'noopener',
-      onClick: () => track('github_click', { location: 'setup_footer' })
+      onClick: () => track('github_click', { location: location || 'footer' })
     }, 'Launch your own ScoringSpades app')
   );
 }
@@ -1114,6 +1179,22 @@ function renderSetup() {
           })
         )
       ),
+      el('div', { class: 'field' },
+        el('div', { class: 'field-label' }, 'Tips'),
+        el('div', { class: 'chips-2' },
+          el('button', {
+            class: 'chip' + (tipsEnabled ? ' active' : ''),
+            onClick: () => { setTipsEnabled(true); render(); }
+          }, 'On'),
+          el('button', {
+            class: 'chip' + (!tipsEnabled ? ' active' : ''),
+            onClick: () => { setTipsEnabled(false); render(); }
+          }, 'Off'),
+        ),
+        el('div', { class: 'field-hint' },
+          "Strategy tips appear under the scoreboard while you play — picked based on the game state (bags, sets, nils, score gap)."
+        )
+      ),
     ),
     el('button', {
       class: 'btn btn-primary',
@@ -1127,7 +1208,7 @@ function renderSetup() {
         saveState(); render();
       }
     }, 'Start Game'),
-    setupFooter()
+    siteFooter('setup_footer')
   );
 }
 
@@ -1185,9 +1266,9 @@ function renderGame() {
       }, 'End game'),
     ),
 
-    state.rounds.length > 0 && el('div', { class: 'game-tip' },
+    state.rounds.length > 0 && tipsEnabled && el('div', { class: 'game-tip' },
       el('strong', null, '♠ Tip'),
-      SPADES_TIPS[currentTipIdx]
+      SPADES_TIPS[currentTipIdx].text
     )
   );
 }
@@ -1585,7 +1666,8 @@ function renderGameOver() {
       el('button', { class: 'btn btn-danger',
         onClick: () => { if (confirm('Start a brand new game?')) resetGame(); }
       }, 'New game (reset everything)')
-    )
+    ),
+    siteFooter('gameover_footer')
   );
 }
 

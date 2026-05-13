@@ -127,6 +127,16 @@
     margin-top: 40px;
     display: flex;
     justify-content: center;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+  .footer-nav a {
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 14px;
+    padding: 8px 14px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
   }
 </style>
 </head>
@@ -139,6 +149,9 @@
 
 <h1>How to Play Spades</h1>
 <p class="lede">The short, practical version — written for people using this app to score their game.</p>
+
+<h2>A bit of history</h2>
+<p>Spades is an American partnership trick-taking game that emerged in the late 1930s, descended from older Whist-family games like Bid Whist and Auction Bridge. It spread quickly through college campuses and the U.S. military during World War II, and by the 1950s had become one of the most-played social card games in the country. The modern partnership-with-bidding format is essentially unchanged from that era — what's evolved is the scoring (bags and nil came later) and the conventions around how partners signal through their bids.</p>
 
 <h2>The basics</h2>
 <ul>
@@ -192,16 +205,98 @@
 <h2>Winning the game</h2>
 <p>First team to reach or exceed the target score wins. If both teams cross the line in the same round, the higher score wins. The app shows the winner on the final screen along with a rematch button.</p>
 
-<h2>A few tips</h2>
+<h2>Bidding strategy</h2>
+<p>Bidding well is most of the game. Played badly, every other skill stops mattering. Here's how experienced players actually evaluate a hand:</p>
+
+<div class="card">
+  <h3>Count your sure tricks first</h3>
+  <p>Aces almost always win. Kings usually win <em>if</em> you also have one or two more cards in that suit to protect them (a singleton King gets crushed under an opponent's Ace). Start your count there.</p>
+</div>
+
+<div class="card">
+  <h3>Then add trump tricks</h3>
+  <p>Every spade above the Ten is likely a winner. Low spades are winners <em>after</em> the high spades and aces are gone — count them when your hand is spade-heavy.</p>
+</div>
+
+<div class="card">
+  <h3>Short side suits are gold</h3>
+  <p>If you have zero or one card in a non-spade suit, you'll be trumping that suit early. A void (zero cards) is worth roughly one extra trick; a singleton is worth a half-trick on average. Bid accordingly.</p>
+</div>
+
+<div class="card">
+  <h3>Long off-suits are traps</h3>
+  <p>Five hearts headed by the Queen is not five tricks. After the Ace and King fall (usually held by opponents), your Queen probably gets trumped. Long weak suits aren't bid material — they're survival material.</p>
+</div>
+
+<div class="card">
+  <h3>Read your partner's bid</h3>
+  <p>You can't signal specific cards, but bidding is a language. A bid of <strong>4 or more</strong> says "I'm strong, you can bid normally." A bid of <strong>1</strong> says "I have very little — carry me." A bid of <strong>0 or nil</strong> says "I have no real tricks." Calibrate your own bid to what your partner just told you.</p>
+</div>
+
+<div class="card">
+  <h3>When to bid nil</h3>
+  <p>Nil is a promise to take zero tricks. It works when you have <em>no</em> Aces, no protected Kings, no spades above the Eight, and no short side suit (because being void means you'll trump in). The classic nil hand is a bunch of low cards spread across the four suits with a few middle spades — boring but safe.</p>
+</div>
+
+<div class="card">
+  <h3>When NOT to bid nil</h3>
+  <p>Don't go nil with the Ace of Spades, a singleton in any suit, or a long spade suit. And don't nil when your team is already winning by 200+ — the +100 reward isn't worth the −100 risk when you're already cruising.</p>
+</div>
+
+<h2>Common rule variants</h2>
+<p>Spades has dozens of house-rule variations. The app's scoring handles the standard rules, but if your group plays differently, here's a glossary of what you might hear at the table:</p>
+
 <ul>
-  <li><strong>Count your spades.</strong> Long spade suits win tricks even with low cards, once the short suits are exhausted.</li>
-  <li><strong>Don't bid every face card.</strong> An off-suit Queen that gets trumped is worth zero. Trust the math — only bid what you'll actually take.</li>
-  <li><strong>Track your bags.</strong> The app shows the running bag count. If you're at 8 or 9, bid tighter next round.</li>
-  <li><strong>Talk to your partner — legally.</strong> You're not allowed to signal specific cards, but bidding patterns are communication. A bid of 4 says "I have strength"; a bid of 1 says "carry me."</li>
+  <li><strong>Suicide nil</strong> — at least one player on each team must bid nil every round. Brutal but fast.</li>
+  <li><strong>Mirror (or "Mirrors")</strong> — players must bid the exact number of spades they hold. No choice, no judgment. Counts as a fun-but-luck-driven variant.</li>
+  <li><strong>Whiz</strong> — players must bid either nil or the exact number of spades they hold. A middle ground between Mirror and free bidding.</li>
+  <li><strong>Jack of Diamonds rule</strong> — the Jack of Diamonds becomes the second-highest trump (just below the Ace of Spades). Rare but you'll occasionally see it.</li>
+  <li><strong>Cutthroat (3-player)</strong> — no partnerships, every player scores individually. Not what this app is built for.</li>
+  <li><strong>Diamond breaks spades</strong> — instead of waiting for someone to play a spade off-suit, leading a diamond also "breaks" trump. Uncommon but you'll meet it.</li>
+  <li><strong>Bag penalty variations</strong> — some groups use 5-bag instead of 10-bag penalties, or skip bag penalties entirely. This app uses the standard 10-bags-for-100 rule.</li>
+  <li><strong>Target score</strong> — 500 is the classic target. Tournament play often uses 250 or 300 for shorter games. Casual play sometimes goes to 650 or even 1000. The app supports any target via "Custom."</li>
 </ul>
 
+<h2>In-app strategy tips</h2>
+<p>Once you've scored your first round, the app shows a rotating strategy tip below the scoreboard. The tips are picked <em>based on what's happening in your game</em>: if your team is at 8 bags, you'll see the bag-warning tip; if someone bid nil, you'll see nil-related advice; if it's a tight endgame, you'll see endgame tips. It's not random — it's reading the state of your match.</p>
+<p>If you'd rather play without tips, there's an <strong>On / Off</strong> toggle on the setup screen. Your choice persists between games.</p>
+
+<h2>FAQ</h2>
+
+<div class="card">
+  <h3>Why are we "set" if we took 13 tricks?</h3>
+  <p>You're set if your team's combined trick count is <em>less</em> than your bid. Taking 13 tricks always meets any bid up to 13, so that's never a set. But if you bid 10 and took 8, that's a set — overshooting on tricks isn't possible, undershooting is.</p>
+</div>
+
+<div class="card">
+  <h3>Is bidding zero the same as nil?</h3>
+  <p>No. Bidding <code>0</code> as your <em>team</em> bid means neither partner declared nil — you're just saying "we don't expect to take any tricks." If you take some anyway, they're all bags (no points, but bag penalty exposure). Nil is declared separately by an individual player and is worth ±100 on top of the team's regular score.</p>
+</div>
+
+<div class="card">
+  <h3>What if both teams hit the target in the same round?</h3>
+  <p>The team with the higher score wins. The app handles this automatically and shows the winner on the gameover screen. If somehow the scores are tied at or above the target, the game continues — but that's vanishingly rare.</p>
+</div>
+
+<div class="card">
+  <h3>What happens at exactly 10 bags?</h3>
+  <p>The moment the running bag counter reaches 10, your team loses 100 points and the counter resets to 0 (so 11 bags = −100 plus 1 carry-over, 12 = −100 plus 2, etc.). The bag display below each team's score shows the current count.</p>
+</div>
+
+<div class="card">
+  <h3>Can I undo a round?</h3>
+  <p>Yes — there's an "Undo last" button on the playing screen. It rolls back the most recent round's score, bags, and bag penalties. Use it if you entered the wrong tricks.</p>
+</div>
+
+<div class="card">
+  <h3>Does it work offline?</h3>
+  <p>Yes. Once the page has loaded once, the app runs entirely in your browser. No server calls during play, no account needed. You can "Add to Home Screen" on iOS or Android for an app-like experience.</p>
+</div>
+
 <div class="footer-nav">
-  <a class="back" href="/">← Back to the scorekeeper</a>
+  <a href="/">Scorekeeper</a>
+  <a href="/privacy.html">Privacy</a>
+  <a href="https://github.com/turnepf/ScoringSpades" target="_blank" rel="noopener">GitHub</a>
 </div>
 
 </body>

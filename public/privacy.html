@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0f1f1a">
+<title>Privacy — Scoring Spades</title>
+<script src="config.js"></script>
+<script>
+(function() {
+  var id = (window.SCORING_CONFIG || {}).gaId;
+  if (!id) return;
+  var s = document.createElement('script');
+  s.async = true;
+  s.src = 'https://www.googletagmanager.com/gtag/js?id=' + id;
+  document.head.appendChild(s);
+  window.dataLayer = window.dataLayer || [];
+  window.gtag = function() { dataLayer.push(arguments); };
+  gtag('js', new Date());
+  gtag('config', id);
+})();
+</script>
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20100%20100'%3E%3Ctext%20y='88'%20font-size='100'%3E%E2%99%A0%3C/text%3E%3C/svg%3E">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  :root {
+    --bg: #0f1f1a;
+    --surface: #1c3329;
+    --surface-2: #244035;
+    --border: #2e4a3e;
+    --text: #f5f0e6;
+    --muted: #8aa599;
+    --gold: #f1c40f;
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  html, body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", system-ui, sans-serif;
+    font-size: 18px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+  body {
+    padding: calc(var(--safe-top) + 16px) 16px calc(var(--safe-bottom) + 48px);
+    max-width: 640px;
+    margin: 0 auto;
+  }
+  header.top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 28px;
+  }
+  .title { font-size: 26px; font-weight: 700; letter-spacing: -0.02em; }
+  .title .spade { margin-right: 6px; }
+  a { color: var(--gold); }
+  a.back {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 14px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: transparent;
+  }
+  h1 {
+    font-size: 32px;
+    letter-spacing: -0.02em;
+    margin-bottom: 8px;
+  }
+  .lede {
+    color: var(--muted);
+    font-size: 17px;
+    margin-bottom: 28px;
+  }
+  h2 {
+    font-size: 20px;
+    margin-top: 32px;
+    margin-bottom: 10px;
+    color: var(--gold);
+  }
+  p { margin-bottom: 12px; }
+  ul, ol { margin: 10px 0 14px 22px; }
+  li { margin-bottom: 8px; }
+  code, .inline {
+    background: var(--surface-2);
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 15px;
+  }
+  .updated {
+    color: var(--muted);
+    font-size: 14px;
+    margin-top: 28px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+  }
+  .footer-nav {
+    margin-top: 40px;
+    display: flex;
+    justify-content: center;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+  .footer-nav a {
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 14px;
+    padding: 8px 14px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+  }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="title"><span class="spade">♠</span>Scoring Spades</div>
+  <a class="back" href="/">← Back</a>
+</header>
+
+<h1>Privacy</h1>
+<p class="lede">The short version: Scoring Spades doesn't ask for your name, your email, or anything else. Your game scores live in your browser. We use Google Analytics to count visits, and we may show ads.</p>
+
+<h2>What we collect from you</h2>
+<p><strong>Nothing personal.</strong> There are no accounts, no signups, no logins, no email forms, and no profile to fill out. We never ask for your name, email, phone number, age, or location.</p>
+
+<h2>Where your game data lives</h2>
+<p>Player names, scores, bid history, and game settings are stored in your own browser using <code>localStorage</code>. That data never leaves your device and we cannot see it. It stays until you clear your browser data or use the "Start a brand new game" button.</p>
+
+<h2>Analytics</h2>
+<p>We use <strong>Google Analytics</strong> (gtag.js) to count visitors and see which pages get used. Google sets cookies and may collect things like your approximate location (from IP), the page you came from, your browser type, and how long you stayed. We use this only to understand traffic patterns.</p>
+<p>If you have an ad blocker or Do Not Track enabled, most modern browsers and extensions will block Google Analytics automatically — that's fine, the app works exactly the same.</p>
+
+<h2>Advertising</h2>
+<p>This site may show ads served by <strong>Google AdSense</strong>. Google and its partners may use cookies to serve ads based on your prior visits to this site and other sites. Personalized advertising can be turned off at <a href="https://adssettings.google.com" target="_blank" rel="noopener">adssettings.google.com</a>. You can read more about how Google uses ad data at <a href="https://policies.google.com/technologies/ads" target="_blank" rel="noopener">policies.google.com/technologies/ads</a>.</p>
+
+<h2>Third parties</h2>
+<ul>
+  <li><strong>Google</strong> — Analytics and (when active) AdSense. <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Google's privacy policy</a>.</li>
+  <li><strong>Cloudflare</strong> — hosts and serves the site. Cloudflare may log standard request data (IP address, user agent) for security and abuse prevention. <a href="https://www.cloudflare.com/privacypolicy/" target="_blank" rel="noopener">Cloudflare's privacy policy</a>.</li>
+</ul>
+
+<h2>Your choices</h2>
+<ul>
+  <li><strong>Clear your game data.</strong> Use "Start a brand new game" in the app, or clear your browser's site data for scoringspades.com.</li>
+  <li><strong>Opt out of ad personalization.</strong> Visit <a href="https://adssettings.google.com" target="_blank" rel="noopener">adssettings.google.com</a>.</li>
+  <li><strong>Block analytics and ads.</strong> Any standard ad blocker (uBlock Origin, Brave's shields, Safari content blockers) will block both. The scorekeeper still works.</li>
+  <li><strong>Do Not Track.</strong> If your browser sends DNT, Google honors it according to their published policies.</li>
+</ul>
+
+<h2>Children</h2>
+<p>Scoring Spades is a card-game scorekeeper suitable for all ages, but the site isn't directed at children under 13 and we don't knowingly collect data from them. If you're a parent and a child has used the app, the only data is whatever they typed into the scorekeeper, which lives only on that device.</p>
+
+<h2>Open source</h2>
+<p>The full source code is public on <a href="https://github.com/turnepf/ScoringSpades" target="_blank" rel="noopener">GitHub</a>. You can verify exactly what data the app touches, fork it, or run your own copy. If you self-host with the same code, set <code>gaId</code> to an empty string in <code>config.js</code> to turn off analytics entirely.</p>
+
+<h2>Contact</h2>
+<p>Questions about this policy? Email <a href="mailto:patrick@patrickturner.net">patrick@patrickturner.net</a>.</p>
+
+<h2>Changes</h2>
+<p>If this policy changes, we'll update this page and the "Last updated" date below. There's no email list to notify you.</p>
+
+<p class="updated">Last updated: May 13, 2026</p>
+
+<div class="footer-nav">
+  <a href="/">Scorekeeper</a>
+  <a href="/how-to-play.html">How to play</a>
+  <a href="https://github.com/turnepf/ScoringSpades" target="_blank" rel="noopener">GitHub</a>
+</div>
+
+</body>
+</html>
