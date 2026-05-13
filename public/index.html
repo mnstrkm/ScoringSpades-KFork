@@ -1275,10 +1275,12 @@ function renderGame() {
       }, 'End game'),
     ),
 
-    state.rounds.length > 0 && tipsEnabled && el('div', { class: 'game-tip' },
-      el('strong', null, '♠ Tip'),
-      SPADES_TIPS[currentTipIdx].text
-    )
+    (state.rounds.length > 0 && tipsEnabled)
+      ? el('div', { class: 'game-tip' },
+          el('strong', null, '♠ Tip'),
+          SPADES_TIPS[currentTipIdx].text
+        )
+      : ''
   );
 }
 
