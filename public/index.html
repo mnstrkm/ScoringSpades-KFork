@@ -895,6 +895,8 @@ function newGameState() {
     team1: { score: 0, bags: 0, players: last ? last.team1.slice() : ['', ''] },
     team2: { score: 0, bags: 0, players: last ? last.team2.slice() : ['', ''] },
     target: 500,
+    nilPoints: 100,
+    nilPartnerMinBid: 0,
     rounds: [],
   };
 }
@@ -924,11 +926,11 @@ const SPADES_TIPS = [
     when: s => lastRoundOverbid(s) },
   { text: "Bid to your hand, not to 13 — a forced tight bid often ends in a set.",
     when: s => lastRoundSet(s) },
-  { text: "Way behind? A blind nil is a 200-point swing — risky but real.",
+  { text: s => `Way behind? A blind nil is a ${(s.nilPoints || 100) * 2}-point swing — risky but real.`,
     when: s => Math.abs(s.team1.score - s.team2.score) >= 100 },
   { text: "Tight endgame — bags matter less than hitting your bid exactly.",
     when: s => (s.target - s.team1.score) <= 50 && (s.target - s.team2.score) <= 50 },
-  { text: "Cover your partner's nil before chasing your own bid — a failed nil costs 100.",
+  { text: s => `Cover your partner's nil before chasing your own bid — a failed nil costs ${s.nilPoints || 100}.`,
     when: s => lastRoundHadNil(s) },
   { text: "If your partner bids nil, lead your highest side-suit cards so they can safely dump low.",
     when: s => lastRoundHadNil(s) },
@@ -983,6 +985,9 @@ function loadState() {
     if (!raw) return newGameState();
     const parsed = JSON.parse(raw);
     if (!parsed || !parsed.team1) return newGameState();
+    // Older saved states predate these house-rule settings.
+    if (typeof parsed.nilPoints !== 'number' || parsed.nilPoints <= 0) parsed.nilPoints = 100;
+    if (typeof parsed.nilPartnerMinBid !== 'number' || parsed.nilPartnerMinBid < 0) parsed.nilPartnerMinBid = 0;
     for (const t of [parsed.team1, parsed.team2]) {
       if (Array.isArray(t.players)) {
         t.players = t.players.map(p => LEGACY_DEFAULTS.has(p) ? '' : (p || ''));
@@ -1015,8 +1020,9 @@ function resetGame() {
 function scoreTeamRound(tr) {
   let delta = 0, bags = 0;
 
+  const nilValue = state.nilPoints || 100;
   for (const n of tr.nils) {
-    const pts = n.type === 'blind' ? 200 : 100;
+    const pts = n.type === 'blind' ? nilValue * 2 : nilValue;
     delta += (n.tricks === 0) ? pts : -pts;
   }
 
@@ -1203,6 +1209,45 @@ function renderSetup() {
         )
       ),
       el('div', { class: 'field' },
+        el('div', { class: 'field-label' }, 'Nil is worth'),
+        el('div', { class: 'target-chips' },
+          ...[50, 100, 200, 'Custom'].map(v => {
+            const isCustom = v === 'Custom';
+            const customNil = ![50, 100, 200].includes(state.nilPoints);
+            const active = isCustom ? customNil : state.nilPoints === v;
+            return el('button', {
+              class: 'chip' + (active ? ' active' : ''),
+              onClick: () => {
+                if (isCustom) {
+                  const raw = prompt('Points for making nil?', state.nilPoints);
+                  const n = parseInt(raw, 10);
+                  if (n && n > 0) { state.nilPoints = n; saveState(); render(); }
+                } else {
+                  state.nilPoints = v; saveState(); render();
+                }
+              }
+            }, isCustom && customNil ? String(state.nilPoints) : String(v));
+          })
+        ),
+        el('div', { class: 'field-hint' },
+          `Points won or lost on a nil bid (standard is 100). Blind nil is always double: ±${state.nilPoints * 2}.`
+        )
+      ),
+      el('div', { class: 'field' },
+        el('div', { class: 'field-label' }, "Nil partner's minimum bid"),
+        el('div', { class: 'target-chips' },
+          ...[0, 3, 4, 5].map(v =>
+            el('button', {
+              class: 'chip' + (state.nilPartnerMinBid === v ? ' active' : ''),
+              onClick: () => { state.nilPartnerMinBid = v; saveState(); render(); }
+            }, v === 0 ? 'None' : String(v))
+          )
+        ),
+        el('div', { class: 'field-hint' },
+          "House rule: when a player bids nil, their partner must bid at least this much. \"None\" allows any bid."
+        )
+      ),
+      el('div', { class: 'field' },
         el('div', { class: 'field-label' }, 'Tips'),
         el('div', { class: 'chips-2' },
           el('button', {
@@ -1292,7 +1337,9 @@ function renderGame() {
     (state.rounds.length > 0 && tipsEnabled)
       ? el('div', { class: 'game-tip' },
           el('strong', null, '♠ Tip'),
-          SPADES_TIPS[currentTipIdx].text
+          typeof SPADES_TIPS[currentTipIdx].text === 'function'
+            ? SPADES_TIPS[currentTipIdx].text(state)
+            : SPADES_TIPS[currentTipIdx].text
         )
       : ''
   );
@@ -1457,7 +1504,14 @@ function formatTeamBid(s) {
 }
 
 function isBidReady(dt) {
-  return dt.players.every(p => p.bid !== null);
+  return dt.players.every((p, i) => {
+    if (p.bid === null) return false;
+    // House rule: a numeric bid must meet the minimum when the partner is on nil.
+    const partner = dt.players[1 - i];
+    const partnerNil = partner.bid === 'nil' || partner.bid === 'blind';
+    if (partnerNil && typeof p.bid === 'number' && p.bid < state.nilPartnerMinBid) return false;
+    return true;
+  });
 }
 
 function teamBidStep(key, team, dt) {
@@ -1471,12 +1525,28 @@ function teamBidStep(key, team, dt) {
 
 function playerBidBlock(team, dt, playerIdx, teamColor) {
   const p = dt.players[playerIdx];
-  const setBid = v => { p.bid = v; render(); };
+  const partner = dt.players[1 - playerIdx];
+  const partnerNil = partner.bid === 'nil' || partner.bid === 'blind';
+  const minBid = partnerNil ? state.nilPartnerMinBid : 0;
+  const setBid = v => {
+    p.bid = v;
+    // Going nil can invalidate a partner bid already below the house minimum.
+    if ((v === 'nil' || v === 'blind') && typeof partner.bid === 'number' &&
+        partner.bid < state.nilPartnerMinBid) {
+      partner.bid = null;
+    }
+    render();
+  };
   return el('div', { class: 'player-bid' },
-    el('div', { class: 'player-bid-name' }, team.players[playerIdx]),
+    el('div', { class: 'player-bid-name' },
+      team.players[playerIdx],
+      minBid > 0 && el('span', { style: 'color:var(--muted); font-weight:600; font-size:12px;' },
+        ` — min bid ${minBid} (partner nil)`)
+    ),
     el('div', { class: 'num-grid' },
       ...Array.from({ length: 14 }, (_, i) => el('button', {
         class: 'num-btn' + (p.bid === i ? ' active ' + teamColor : ''),
+        disabled: i < minBid,
         onClick: () => setBid(i)
       }, String(i)))
     ),
@@ -1676,10 +1746,12 @@ function renderGameOver() {
       class: 'btn btn-primary',
       onClick: () => {
         const t1Players = state.team1.players, t2Players = state.team2.players;
-        const target = state.target;
+        const { target, nilPoints, nilPartnerMinBid } = state;
         state = newGameState();
         state.team1.players = t1Players; state.team2.players = t2Players;
         state.target = target;
+        state.nilPoints = nilPoints;
+        state.nilPartnerMinBid = nilPartnerMinBid;
         state.phase = 'playing';
         track('game_started', { target: state.target, rematch: true });
         saveState();

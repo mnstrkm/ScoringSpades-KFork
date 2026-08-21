@@ -16,7 +16,7 @@ A scoring app for the card game Spades. Single-page web app at scoringspades.com
 
 - **State/phases:** `setup` → `playing` → `gameover`. `modal` is a separate global: `bid`, `tricks`, or `preview`.
 - **Render entry:** `render()` routes on `state.phase`. Each screen has a `renderX()` function that calls `app.replaceChildren(...)`.
-- **Scoring model** (`scoreTeamRound`): `bid × 10` if they hit, `−bid × 10` if they miss, `+1` per bag. Bag overflow: every 10 bags = `−100` penalty. Nil = ±100, Blind nil = ±200.
+- **Scoring model** (`scoreTeamRound`): `bid × 10` if they hit, `−bid × 10` if they miss, `+1` per bag. Bag overflow: every 10 bags = `−100` penalty. Nil = ±`state.nilPoints` (default 100, configurable on setup), Blind nil always double that. Optional house rule `state.nilPartnerMinBid` (default 0) forces the nil bidder's partner to bid at least N — enforced in the bid modal.
 - **Legacy name migration:** old default placeholder names (`Player 1`–`Player 4`) are wiped on load so the user isn't stuck with them.
 
 ## Deploy (Cloudflare Worker + Static Assets)
