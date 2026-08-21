@@ -896,6 +896,7 @@ function newGameState() {
     team2: { score: 0, bags: 0, players: last ? last.team2.slice() : ['', ''] },
     target: 500,
     nilPoints: 100,
+    blindNilPoints: 200,
     nilPartnerMinBid: 0,
     rounds: [],
   };
@@ -926,7 +927,7 @@ const SPADES_TIPS = [
     when: s => lastRoundOverbid(s) },
   { text: "Bid to your hand, not to 13 — a forced tight bid often ends in a set.",
     when: s => lastRoundSet(s) },
-  { text: s => `Way behind? A blind nil is a ${(s.nilPoints || 100) * 2}-point swing — risky but real.`,
+  { text: s => `Way behind? A blind nil is a ${s.blindNilPoints || 200}-point swing — risky but real.`,
     when: s => Math.abs(s.team1.score - s.team2.score) >= 100 },
   { text: "Tight endgame — bags matter less than hitting your bid exactly.",
     when: s => (s.target - s.team1.score) <= 50 && (s.target - s.team2.score) <= 50 },
@@ -987,6 +988,8 @@ function loadState() {
     if (!parsed || !parsed.team1) return newGameState();
     // Older saved states predate these house-rule settings.
     if (typeof parsed.nilPoints !== 'number' || parsed.nilPoints <= 0) parsed.nilPoints = 100;
+    // Saves that predate a separate blind value used 2 × nil.
+    if (typeof parsed.blindNilPoints !== 'number' || parsed.blindNilPoints <= 0) parsed.blindNilPoints = parsed.nilPoints * 2;
     if (typeof parsed.nilPartnerMinBid !== 'number' || parsed.nilPartnerMinBid < 0) parsed.nilPartnerMinBid = 0;
     for (const t of [parsed.team1, parsed.team2]) {
       if (Array.isArray(t.players)) {
@@ -1020,9 +1023,8 @@ function resetGame() {
 function scoreTeamRound(tr) {
   let delta = 0, bags = 0;
 
-  const nilValue = state.nilPoints || 100;
   for (const n of tr.nils) {
-    const pts = n.type === 'blind' ? nilValue * 2 : nilValue;
+    const pts = n.type === 'blind' ? (state.blindNilPoints || 200) : (state.nilPoints || 100);
     delta += (n.tricks === 0) ? pts : -pts;
   }
 
@@ -1208,31 +1210,12 @@ function renderSetup() {
           })
         )
       ),
-      el('div', { class: 'field' },
-        el('div', { class: 'field-label' }, 'Nil is worth'),
-        el('div', { class: 'target-chips' },
-          ...[50, 100, 200, 'Custom'].map(v => {
-            const isCustom = v === 'Custom';
-            const customNil = ![50, 100, 200].includes(state.nilPoints);
-            const active = isCustom ? customNil : state.nilPoints === v;
-            return el('button', {
-              class: 'chip' + (active ? ' active' : ''),
-              onClick: () => {
-                if (isCustom) {
-                  const raw = prompt('Points for making nil?', state.nilPoints);
-                  const n = parseInt(raw, 10);
-                  if (n && n > 0) { state.nilPoints = n; saveState(); render(); }
-                } else {
-                  state.nilPoints = v; saveState(); render();
-                }
-              }
-            }, isCustom && customNil ? String(state.nilPoints) : String(v));
-          })
-        ),
-        el('div', { class: 'field-hint' },
-          `Points won or lost on a nil bid (standard is 100). Blind nil is always double: ±${state.nilPoints * 2}.`
-        )
-      ),
+      pointsChipField('Nil is worth', 'nilPoints', [50, 100, 200],
+        'Points for making nil?',
+        'Points won or lost on a nil bid (standard is 100).'),
+      pointsChipField('Blind nil is worth', 'blindNilPoints', [100, 200, 400],
+        'Points for making blind nil?',
+        'Points won or lost on a blind nil bid (standard is 200).'),
       el('div', { class: 'field' },
         el('div', { class: 'field-label' }, "Nil partner's minimum bid"),
         el('div', { class: 'target-chips' },
@@ -1277,6 +1260,32 @@ function renderSetup() {
       }
     }, 'Start Game'),
     siteFooter('setup_footer')
+  );
+}
+
+function pointsChipField(label, key, presets, promptText, hint) {
+  const isCustomValue = !presets.includes(state[key]);
+  return el('div', { class: 'field' },
+    el('div', { class: 'field-label' }, label),
+    el('div', { class: 'target-chips' },
+      ...[...presets, 'Custom'].map(v => {
+        const isCustom = v === 'Custom';
+        const active = isCustom ? isCustomValue : state[key] === v;
+        return el('button', {
+          class: 'chip' + (active ? ' active' : ''),
+          onClick: () => {
+            if (isCustom) {
+              const raw = prompt(promptText, state[key]);
+              const n = parseInt(raw, 10);
+              if (n && n > 0) { state[key] = n; saveState(); render(); }
+            } else {
+              state[key] = v; saveState(); render();
+            }
+          }
+        }, isCustom && isCustomValue ? String(state[key]) : String(v));
+      })
+    ),
+    el('div', { class: 'field-hint' }, hint)
   );
 }
 
@@ -1746,11 +1755,12 @@ function renderGameOver() {
       class: 'btn btn-primary',
       onClick: () => {
         const t1Players = state.team1.players, t2Players = state.team2.players;
-        const { target, nilPoints, nilPartnerMinBid } = state;
+        const { target, nilPoints, blindNilPoints, nilPartnerMinBid } = state;
         state = newGameState();
         state.team1.players = t1Players; state.team2.players = t2Players;
         state.target = target;
         state.nilPoints = nilPoints;
+        state.blindNilPoints = blindNilPoints;
         state.nilPartnerMinBid = nilPartnerMinBid;
         state.phase = 'playing';
         track('game_started', { target: state.target, rematch: true });
