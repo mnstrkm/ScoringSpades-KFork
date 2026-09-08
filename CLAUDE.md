@@ -33,7 +33,7 @@ A scoring app for the card game Spades. Single-page web app at scoringspades.com
 `wrangler.jsonc` lives at the repo root (added by Cloudflare's GitHub auto-config bot in PR #1, April 2026), so deploy is one command from the project root:
 
 ```
-cd ~/Documents/Dev/ScoringSpades
+cd ~/ScoringSpades
 wrangler deploy
 
 # Verify
