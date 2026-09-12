@@ -1,5 +1,5 @@
 {
-  "name": "ScoringSpades",
+  "name": "SpadesScoring",
   "short_name": "Spades",
   "description": "A clean, mobile-first scorekeeper for the card game Spades.",
   "start_url": "/",
