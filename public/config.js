@@ -10,5 +10,5 @@
 
 window.SCORING_CONFIG = {
   // Google Analytics 4 measurement ID. Set to '' to disable.
-  gaId: ,
+  gaId: '',
 };
