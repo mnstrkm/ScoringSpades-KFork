@@ -1145,9 +1145,8 @@ const GITHUB_URL = 'https://github.com/turnepf/ScoringSpades';
 
 function siteFooter(location) {
   return el('div', { class: 'footer-links' },
-    el('a', { class: 'footer-link', href: '/how-to-play' }, 'How to Play'),
-    el('a', { class: 'footer-link', href: '/privacy' }, 'Privacy'),
-    el('a', { class: 'footer-link', href: GITHUB_URL, target: '_blank', rel: 'noopener',
+    el('a', { class: 'footer-link', href: './how-to-play.html' }, 'How to Play'),
+        el('a', { class: 'footer-link', href: GITHUB_URL, target: '_blank', rel: 'noopener',
       onClick: () => track('github_click', { location: location || 'footer' })
     }, 'Launch your own ScoringSpades app')
   );
